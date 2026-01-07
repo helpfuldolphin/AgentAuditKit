@@ -21,15 +21,21 @@ It is designed to support:
 
 It does not determine truth, correctness, or admissibility.
 
-## Intended Users
+## For Whom / Not For
 
-- Security teams (SOC / IR)
-- Red team operators
-- AI risk and trust teams
-- Legal and compliance reviewers
-- Insurers and third-party auditors
+**Agent Audit Kit produces evidence artifacts, not truth claims.**
 
-This tool is not intended to certify correctness or safety.
+**For:**
+- Incident response and forensic review
+- Red team exercises and penetration testing
+- Underwriting evidence and insurance review
+- Legal discovery and audit trails
+
+**Not for:**
+- Compliance certification
+- Governance authority or trust assignment
+- Correctness proofs or formal verification
+- Automated decision-making
 
 ## Non-Claims Discipline
 
