@@ -140,3 +140,76 @@ class TestExportAndVerify:
         assert "disclaimer" in manifest
         assert "compliance" in manifest["disclaimer"].lower()
         assert "not" in manifest["disclaimer"].lower()
+
+    def test_export_manifest_contains_threat_flags(self, populated_vault: Path, tmp_path: Path):
+        """Manifest includes threat_flags when provided."""
+        import json
+        from datetime import datetime, timezone
+
+        from aak.models.threats import (
+            OWASPAgenticTag,
+            Severity,
+            ThreatClass,
+            ThreatFlag,
+        )
+
+        bundle_path = tmp_path / "bundle"
+
+        # Create threat flags
+        threat_flags = [
+            ThreatFlag(
+                flag_id="test_flag_001",
+                threat_class=ThreatClass.TOOL_MISUSE,
+                severity=Severity.HIGH,
+                owasp_asi_tags=[OWASPAgenticTag.ASI02, OWASPAgenticTag.ASI03],
+                event_seq=1,
+                evidence_hash="a" * 64,
+                description="Test tool misuse flag",
+                detector_id="test_detector",
+                detector_version="0.1.0",
+                confidence=0.95,
+                detected_at=datetime.now(timezone.utc),
+                raw_evidence={"test": "data"},
+            ),
+            ThreatFlag(
+                flag_id="test_flag_002",
+                threat_class=ThreatClass.RAG_POISONING,
+                severity=Severity.CRITICAL,
+                owasp_asi_tags=[OWASPAgenticTag.ASI01, OWASPAgenticTag.ASI06],
+                event_seq=2,
+                evidence_hash="b" * 64,
+                description="Test RAG poisoning flag",
+                detector_id="test_detector",
+                detector_version="0.1.0",
+                confidence=0.88,
+                detected_at=datetime.now(timezone.utc),
+            ),
+        ]
+
+        # Export with threat flags
+        result = export_bundle(
+            populated_vault,
+            bundle_path,
+            include_verify_script=True,
+            threat_flags=threat_flags,
+        )
+
+        # Verify threat flags in manifest
+        manifest = json.loads((bundle_path / "replay_manifest.json").read_text())
+        assert "threat_flags" in manifest
+        assert len(manifest["threat_flags"]) == 2
+        assert result.threat_flags_count == 2
+
+        # Verify flag structure
+        flag1 = manifest["threat_flags"][0]
+        assert flag1["flag_id"] == "test_flag_001"
+        assert flag1["threat_class"] == "TOOL_MISUSE"
+        assert flag1["severity"] == "HIGH"
+        assert "ASI02" in flag1["owasp_asi_tags"]
+        assert flag1["is_heuristic"] is True
+
+        flag2 = manifest["threat_flags"][1]
+        assert flag2["flag_id"] == "test_flag_002"
+        assert flag2["threat_class"] == "RAG_POISONING"
+        assert flag2["severity"] == "CRITICAL"
+        assert "ASI01" in flag2["owasp_asi_tags"]

@@ -18,6 +18,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 sys.path.insert(0, str(Path(__file__).parent))
 
+from mock_tools import TOOL_REGISTRY, calculate_metrics, search_kb
+
 from aak.canon.hasher import domain_hash
 from aak.models.events import (
     EventSource,
@@ -36,8 +38,6 @@ from aak.models.threats import (
 )
 from aak.vault.export import export_bundle
 from aak.vault.store import VaultWriter
-
-from mock_tools import TOOL_REGISTRY, calculate_metrics, search_kb
 
 
 def run_demo(output_path: Path) -> None:
@@ -299,7 +299,7 @@ def run_demo(output_path: Path) -> None:
         threat_flags=threat_flags,
     )
 
-    print(f"[DEMO] Bundle created:")
+    print("[DEMO] Bundle created:")
     print(f"       - Events: {result.event_count}")
     print(f"       - Threat flags: {result.threat_flags_count}")
     print(f"       - Manifest hash: {result.manifest_hash[:16]}...")
@@ -310,7 +310,7 @@ def run_demo(output_path: Path) -> None:
     print("DEMO SUMMARY")
     print("=" * 60)
     print(f"Bundle path: {bundle_path}")
-    print(f"Tool calls captured: 3 (search_kb, get_employee_ssn_list, calculate_metrics)")
+    print("Tool calls captured: 3 (search_kb, get_employee_ssn_list, calculate_metrics)")
     print(f"Threat flags with OWASP ASI tags: {len(threat_flags)}")
     for flag in threat_flags:
         tags = ", ".join(t.value for t in flag.owasp_asi_tags)
