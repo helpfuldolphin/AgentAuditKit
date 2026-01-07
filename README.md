@@ -1,6 +1,6 @@
 # Agent Audit Kit
 
-Forensic evidence capture and replay for AI agents.
+Forensic evidence capture and replay for AI agents — designed for incident response, red teaming, and audit review, not governance or compliance certification.
 
 [![CI](https://github.com/your-org/agent-audit-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/your-org/agent-audit-kit/actions/workflows/ci.yml)
 
@@ -8,7 +8,28 @@ Forensic evidence capture and replay for AI agents.
 
 Agent Audit Kit (AAK) provides tamper-evident capture and replay of AI agent interactions for forensic analysis and incident response.
 
-**Lane B / Exploratory**: This is a revenue-facing forensic tool. It produces evidence artifacts suitable for audit review, NOT compliance certifications.
+**Lane B / Exploratory (Forensic)**
+
+Agent Audit Kit is intentionally non-authoritative.
+It captures *what happened*, not *what is correct*.
+
+It is designed to support:
+- incident response
+- red team exercises
+- insurance and legal review
+- auditor inspection of agent behavior
+
+It does not determine truth, correctness, or admissibility.
+
+## Intended Users
+
+- Security teams (SOC / IR)
+- Red team operators
+- AI risk and trust teams
+- Legal and compliance reviewers
+- Insurers and third-party auditors
+
+This tool is not intended to certify correctness or safety.
 
 ## Non-Claims Discipline
 
@@ -26,6 +47,24 @@ What it DOES provide:
 - OWASP Agentic (ASI) threat detection mappings
 - Portable evidence bundles with standalone verification
 - Provenance labeling (`captured` vs `synthetic`)
+
+## Lane Boundary Rule (Hard)
+
+Agent Audit Kit artifacts are **evidence only**.
+
+They may be:
+- reviewed by humans
+- attached to audit reports
+- supplied to insurers, regulators, or courts
+
+They may NOT be:
+- treated as verified claims
+- used to assign trust class
+- used to upgrade authority
+- substituted for governance-grade verification
+
+Authority decisions belong to Lane A systems (e.g. MathLedger),
+not to this tool.
 
 ## Quickstart
 
@@ -70,6 +109,9 @@ cd demo_output/bundle && python verify.py
               │  (forensic or counterfactual)│
               └─────────────────────────────┘
 ```
+
+**Note**: Replay verifies capture integrity and event ordering.
+It does not imply deterministic re-execution of hosted LLMs.
 
 ## Key Components
 
