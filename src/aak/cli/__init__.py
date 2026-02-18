@@ -9,6 +9,7 @@ from typing import Sequence
 from aak import __version__
 from aak.models.events import EventSource, LLMRequestEvent, LLMResponseEvent, SessionStartEvent
 from aak.replay import verify_bundle
+from aak.report import ReportError, generate_audit_report
 from aak.stress import SUPPORTED_STRESS_PROFILES, StressError, run_stress
 from aak.vault.export import export_bundle
 from aak.vault.store import VaultWriter
@@ -75,6 +76,21 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Output directory for stress artifacts (default: <bundle>/stress_runs/<profile>)",
     )
     stress_run.set_defaults(handler=_handle_stress_run)
+
+    report = commands.add_parser("report", help="Generate deterministic audit report artifacts")
+    report_sub = report.add_subparsers(dest="report_command")
+    report_generate = report_sub.add_parser(
+        "generate",
+        help="Generate deterministic narrative report from a verified bundle",
+        description=f"Report command. {NON_CLAIMS}",
+    )
+    report_generate.add_argument("--bundle", required=True, help="Path to bundle directory")
+    report_generate.add_argument(
+        "--out",
+        required=True,
+        help="Output directory for report artifact",
+    )
+    report_generate.set_defaults(handler=_handle_report_generate)
 
     return parser
 
@@ -155,6 +171,22 @@ def _handle_stress_run(args: argparse.Namespace) -> int:
     print(f"[OK] Stress bundle: {result.output_dir}")
     print(f"[OK] stress_run_hash: {result.run_hash}")
     print(f"[OK] stress_diff_hash: {result.diff_hash}")
+    return EXIT_OK
+
+
+def _handle_report_generate(args: argparse.Namespace) -> int:
+    try:
+        result = generate_audit_report(Path(args.bundle), out_dir=Path(args.out))
+    except ReportError as exc:
+        print(f"[FAIL] Report generation failed: {exc}")
+        return EXIT_VERIFY_FAIL
+
+    print("[OK] Report generation complete.")
+    print(f"[OK] Bundle ID: {result.bundle_id}")
+    print(f"[OK] Events summarized: {result.event_count}")
+    print(f"[OK] Decision points: {result.decision_point_count}")
+    print(f"[OK] Report path: {result.report_path}")
+    print(f"[OK] report_hash: {result.report_hash}")
     return EXIT_OK
 
 
