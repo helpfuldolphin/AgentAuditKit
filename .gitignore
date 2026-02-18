@@ -85,3 +85,7 @@ golden_runs/aak-v0.1.0-e3.zip
 # OS
 .DS_Store
 Thumbs.db
+
+# OpenClaw demo generated output
+examples/openclaw/output/
+
