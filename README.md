@@ -7,6 +7,7 @@ Forensic evidence capture and replay for AI agents — designed for incident res
 ## Overview
 
 Agent Audit Kit (AAK) provides tamper-evident capture and replay of AI agent interactions for forensic analysis and incident response.
+It can also generate a deterministic, non-authoritative narrative report from a verified bundle.
 
 **Lane B / Exploratory (Forensic)**
 
@@ -88,6 +89,10 @@ python demo/harness.py --output ./demo_output
 
 # Verify the bundle
 cd demo_output/bundle && python verify.py
+
+# Generate deterministic audit narrative from a verified bundle
+cd ../..
+python -m aak.cli report generate --bundle ./demo_output/bundle --out ./demo_output/report
 ```
 
 ## Architecture

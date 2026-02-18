@@ -2,6 +2,29 @@
 
 All notable changes to Agent Audit Kit are documented here.
 
+## [0.1.1-report] - 2026-02-18
+
+### Added
+
+- `aak report generate --bundle ... --out ...` deterministic report command.
+- `audit_report.md` derived artifact generation (fixed template, explicit `UNKNOWN` fields).
+- report contract: `docs/contracts/AUDIT_REPORT_CONTRACT_V0_1.md`.
+- acceptance gates for:
+  - byte-identical report determinism
+  - tamper -> fail-closed behavior
+  - banned overclaiming vocabulary in report text
+
+### Changed
+
+- Golden run evidence pack now includes report generation command, `audit_report.md`, and `report_hash`.
+- `.gitignore` now excludes `examples/openclaw/output/` generated artifacts.
+
+### Non-Claims
+
+- Report layer remains evidence-only and non-authoritative.
+- No intent/causality inference.
+- No correctness/safety/compliance guarantees.
+
 ## [0.1.0-week2] - 2026-01-07
 
 ### Added

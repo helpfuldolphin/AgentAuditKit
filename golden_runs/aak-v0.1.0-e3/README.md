@@ -10,6 +10,7 @@ Generated: `2026-02-18`
 python -m aak.cli capture run --config golden_runs/aak-v0.1.0-e3/aak.yaml --out golden_runs/aak-v0.1.0-e3
 python -m aak.cli replay verify --bundle golden_runs/aak-v0.1.0-e3/bundle
 python -m aak.cli stress run --bundle golden_runs/aak-v0.1.0-e3/bundle --profile authority --seed 11
+python -m aak.cli report generate --bundle golden_runs/aak-v0.1.0-e3/bundle --out golden_runs/aak-v0.1.0-e3/report
 cd golden_runs/aak-v0.1.0-e3/bundle && python verify.py
 ```
 
@@ -18,6 +19,7 @@ cd golden_runs/aak-v0.1.0-e3/bundle && python verify.py
 ```bash
 python -m aak.cli replay verify --bundle ./bundle
 python -m aak.cli stress run --bundle ./bundle --profile authority --seed 11 --output ./stress_verify
+python -m aak.cli report generate --bundle ./bundle --out ./report_verify
 cd ./bundle && python verify.py
 ```
 
@@ -26,9 +28,11 @@ cd ./bundle && python verify.py
 - Capture: `[OK] Capture complete` and `[OK] Events: 3`
 - Replay verify: `[OK] Verified 3 events`
 - Stress: `[OK] Stress run complete. Profile: authority`
+- Report: `[OK] Report generation complete.`
 - Bundle verify script: `Hash Chain: [OK] INTACT` and `Manifest: [OK] VALID`
 - `stress_run_hash`: `700469bdef6020eda02d86115be8ba9e372ae1347837a4b26a924f9287ee8c7d`
 - `stress_diff_hash`: `8d7fb3e4a308df9264ff31f34834cca8acd60ccd4a8a102b1fbbb27c3ac842bc`
+- `report_hash`: `53af62ca77f689aa3ee4bebd3205822f15b7ec7b26bb2c2fc6f183a73f85b85f`
 
 ## Artifact Layout
 
@@ -37,6 +41,7 @@ cd ./bundle && python verify.py
 - `bundle/verify.py`
 - `bundle/stress_runs/authority/stress_run.json`
 - `bundle/stress_runs/authority/stress_diff.json`
+- `report/audit_report.md`
 - `commands.log`
 
 ## What This Proves
@@ -44,6 +49,7 @@ cd ./bundle && python verify.py
 - AAK can capture and export a tamper-evident evidence bundle.
 - AAK replay verification passes on an intact bundle.
 - AAK stress run (authority profile) produces deterministic artifact hashes for this input.
+- AAK report generation produces a deterministic, audit-readable artifact for this input.
 
 ## What This Does Not Prove
 
