@@ -47,6 +47,24 @@ For the same bundle bytes:
 - Decision points must be rule-based from existing event payloads only.
 - No normative claims about correctness, safety, or compliance.
 
+## Non-Claims / Disclaimers (Mandatory)
+
+The report is a derived rendering of bundle artifacts only.
+
+- It is not a truth claim.
+- It is not a compliance certification.
+- It does not infer intent.
+- It does not infer causality.
+- It does not evaluate correctness of actions.
+- It does not provide safety or security guarantees.
+
+The report may describe only:
+
+- what was recorded in the bundle
+- what replay verification passed/failed
+- what stress/replay artifacts matched or differed
+- what fields are unknown
+
 ## Non-Claims (Mandatory)
 
 The report is:

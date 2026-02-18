@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -73,3 +74,29 @@ def test_week7_report_fails_closed_on_tampered_bundle(tmp_path: Path):
     assert result.returncode == 1
     assert "[FAIL]" in result.stdout
     assert not (out_dir / "audit_report.md").exists()
+
+
+def test_week7_report_banned_vocabulary_gate(tmp_path: Path):
+    """Report must stay factual and avoid overclaiming language."""
+    bundle_path = _golden_bundle_path()
+    out_dir = tmp_path / "report_vocab"
+    result = _run_cli(["report", "generate", "--bundle", str(bundle_path), "--out", str(out_dir)])
+    assert result.returncode == 0
+
+    report_text = (out_dir / "audit_report.md").read_text(encoding="utf-8").lower()
+    banned_phrases = [
+        "intended",
+        "believed",
+        "manipulated",
+        "safe",
+        "secure",
+        "compliant",
+        "proved",
+        "guarantee",
+    ]
+    for phrase in banned_phrases:
+        pattern = rf"\\b{re.escape(phrase)}\\b"
+        assert re.search(pattern, report_text) is None, (
+            f"Banned phrase found in audit report: '{phrase}'. "
+            "Report must remain descriptive and non-interpretive."
+        )
