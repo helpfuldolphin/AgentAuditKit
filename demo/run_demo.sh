@@ -76,7 +76,8 @@ import json
 with open("$DEMO_OUTPUT/bundle/replay_manifest.json") as f:
     m = json.load(f)
 
-print(f" Bundle ID:     \033[0;36m{m['run_id']}\033[0m")
+bundle_id = m.get("bundle_id", m.get("run_id", "unknown"))
+print(f" Bundle ID:     \033[0;36m{bundle_id}\033[0m")
 print(f" Event Count:   \033[0;36m{m['event_count']}\033[0m")
 print(f" Chain Head:    \033[0;36m{m['chain_head'][:16]}...\033[0m")
 print()

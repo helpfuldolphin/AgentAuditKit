@@ -1,0 +1,43 @@
+{
+  "version": "0.1.0",
+  "bundle_id": "run_f1ff76f49bfc60eb",
+  "created_at": "2026-02-18T02:15:11.564263Z",
+  "chain_root": "4fa5e8e18df364e28fe59ecfd0dcd250e4c917678f6b55198234a5af1ee2065e",
+  "chain_head": "7a7e090eaa4349b16e7fe74578f74084d7c87c98c9cf4f8543b2336c6ba9bdb4",
+  "events": [
+    {
+      "seq": 0,
+      "event_type": "session_start",
+      "hash": "4fa5e8e18df364e28fe59ecfd0dcd250e4c917678f6b55198234a5af1ee2065e",
+      "prev_hash": "b2579e3d199750f127bce99b124b38eb4f17da770294c8ff40bf8e83b3c4e131",
+      "timestamp": "2026-02-18T02:15:11.528734Z",
+      "payload_file": "events/000_session_start.json"
+    },
+    {
+      "seq": 1,
+      "event_type": "llm_request",
+      "hash": "b48a2e4a28d429af4854bd8bbc6766b99931c566422d4c8eef8cb27f2bb1ac66",
+      "prev_hash": "048e1d3d5d5b170b244f8373d335689d82d5f6d71f3fc1fd2beb5e50a3bf69a6",
+      "timestamp": "2026-02-18T02:15:11.529733Z",
+      "payload_file": "events/001_llm_request.json"
+    },
+    {
+      "seq": 2,
+      "event_type": "llm_response",
+      "hash": "da107d7910090ef1dcaa1697e4cb9843a8e0a792c770c4efcc23928fbe30d36f",
+      "prev_hash": "94549f6f7ece277cecae2d05cc5d5dd2377d6ece2266cac020123bd404d60281",
+      "timestamp": "2026-02-18T02:15:11.530733Z",
+      "payload_file": "events/002_llm_response.json"
+    }
+  ],
+  "event_count": 3,
+  "metadata": {
+    "model_id": null,
+    "provider": null,
+    "sampling_params": {},
+    "sdk_version": "0.1.0",
+    "interceptor_config": {}
+  },
+  "threat_flags": [],
+  "disclaimer": "EVIDENCE ARTIFACT: This bundle is a forensic evidence artifact, NOT a compliance certification. Findings are heuristic-based. Hosted LLMs are non-deterministic; replay may produce different outputs. For governance-grade verification, see Lane A (MathLedger)."
+}

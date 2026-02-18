@@ -17,6 +17,9 @@ dev = [
     "mypy>=1.10",
 ]
 
+[project.scripts]
+aak = "aak.cli:main"
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"

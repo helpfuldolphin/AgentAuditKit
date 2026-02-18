@@ -73,6 +73,14 @@ dmypy.json
 
 # Demo outputs
 demo_output/
+debug_run/
+golden_run/
+golden_run_e3/
+golden_run_e3_b/
+cold_run_check/
+cold_run_release_check/
+golden_runs/*/vault/
+golden_runs/aak-v0.1.0-e3.zip
 
 # OS
 .DS_Store

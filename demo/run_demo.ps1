@@ -63,7 +63,8 @@ Write-Host "------------------------------------------------------------" -Foreg
 Write-Host ""
 
 $manifest = Get-Content "$DemoOutput/bundle/replay_manifest.json" | ConvertFrom-Json
-Write-Host " Bundle ID:     $($manifest.run_id)" -ForegroundColor Cyan
+$bundleId = if ($manifest.bundle_id) { $manifest.bundle_id } else { $manifest.run_id }
+Write-Host " Bundle ID:     $bundleId" -ForegroundColor Cyan
 Write-Host " Event Count:   $($manifest.event_count)" -ForegroundColor Cyan
 Write-Host " Chain Head:    $($manifest.chain_head.Substring(0,16))..." -ForegroundColor Cyan
 Write-Host ""

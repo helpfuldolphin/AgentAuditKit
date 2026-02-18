@@ -12,9 +12,17 @@ When something goes wrong, traditional logs show *what happened* but not *why*.
 
 Incident responders and auditors face a black box.
 
-## The Wedge: Deterministic Capture + Replayable Evidence
+## The Wedge: Replayable, Inspectable, Stress-Testable
 
-Agent Audit Kit captures the full decision context:
+**AAK makes AI agent decisions replayable, inspectable, and stress-testable without modifying the model.**
+
+Why this wedge works:
+
+- Low integration friction for existing agent stacks
+- No model retraining or fine-tuning requirement
+- Practical forensic value for present-day incidents
+
+Agent Audit Kit captures the full execution context:
 
 1. **Every LLM request/response** with model ID, tokens, and timing
 2. **Every tool call** with inputs, outputs, and identity context
@@ -31,7 +39,21 @@ shared with insurers, or attached to incident reports.
 | **SIEM** | SIEMs aggregate logs. AAK captures decision context with cryptographic integrity. |
 | **Guardrails** | Guardrails prevent actions. AAK records what happened for post-hoc analysis. |
 | **Compliance tool** | Compliance requires authority. AAK produces evidence, not certification. |
-| **Deterministic replay** | Hosted LLMs are non-deterministic. AAK verifies capture integrity, not output reproduction. |
+| **Exact model-output reproduction** | Hosted LLMs are non-deterministic. AAK guarantees event replay integrity, not identical hosted outputs. |
+
+## Buyer Framing (Keep It Boring)
+
+Describe AAK as:
+
+- Logging and evidence for high-risk automation
+- Replayable observability for agent actions
+- Forensic readiness and incident audit tooling
+
+Do not describe AAK as:
+
+- Alignment movement infrastructure
+- Epistemic authority layer
+- Cognitive or philosophical defense framework
 
 ## How This Complements Governance Systems
 

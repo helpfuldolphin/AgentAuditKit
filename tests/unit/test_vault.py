@@ -91,6 +91,29 @@ class TestVaultWriter:
         assert len(chain_head) == 64
         assert chain_head == writer.chain_head
 
+    def test_finalize_tolerates_lock_cleanup_error(self, tmp_path: Path, monkeypatch):
+        """finalize() succeeds even if lock-file unlink fails."""
+        writer = VaultWriter(tmp_path / "vault")
+        event = LLMRequestEvent(
+            model_id="gpt-4",
+            messages=[],
+            provider="openai",
+        )
+        writer.append_event(event)
+
+        original_unlink = Path.unlink
+
+        def flaky_unlink(path: Path, *args, **kwargs):
+            if path.name == ".lock":
+                raise PermissionError("simulated lock cleanup failure")
+            return original_unlink(path, *args, **kwargs)
+
+        monkeypatch.setattr(Path, "unlink", flaky_unlink)
+
+        chain_head = writer.finalize()
+        assert len(chain_head) == 64
+        assert chain_head == writer.chain_head
+
     def test_event_files_created(self, tmp_path: Path):
         """Event files are created in events/ directory."""
         vault_path = tmp_path / "vault"

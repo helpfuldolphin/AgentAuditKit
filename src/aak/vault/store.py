@@ -149,7 +149,11 @@ class VaultWriter:
 
         # Remove lock file
         if self._lock_path.exists():
-            self._lock_path.unlink()
+            try:
+                self._lock_path.unlink()
+            except OSError:
+                # Lock cleanup is best-effort; sealed chain state is already persisted.
+                pass
 
         return self._prev_hash
 
