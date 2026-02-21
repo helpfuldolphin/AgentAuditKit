@@ -2,6 +2,32 @@
 
 All notable changes to Agent Audit Kit are documented here.
 
+## [0.2.0-psych-context] - 2026-02-21
+
+### Added
+
+- Optional `psych_context` event extension (`hash_ref` default, `inline_minimal` optional).
+- New psych models: `PsychContext`, `PsychIndicator`, `PsychCaptureMode`, and context hash helper.
+- Optional psych metadata fields on replay manifest session metadata.
+- Optional interceptor provider protocol for live psych context capture (`PsychContextProvider`).
+- New contract: `docs/contracts/CPF_CONTEXT_CONTRACT_V0_2.md`.
+- New acceptance gate: `tests/acceptance/test_week8_psych_context_gate.py`.
+- New golden-run generator: `examples/generate_psych_golden_run.py`.
+- New golden run artifact pack: `golden_runs/aak-v0.2.0-psych-ceo-cac/`.
+
+### Changed
+
+- Replay verification now fail-closes on declared psych artifact mismatch (missing/extra/modified).
+- Embedded bundle `verify.py` now validates optional psych artifact references and hashes.
+- Bundle export now copies optional `psych/` artifacts and records psych metadata when present.
+- Deterministic report adds `Psychological Context (Captured/Referenced)` section.
+- Report CLI output now includes psych context count.
+
+### Non-Claims
+
+- Psych context linkage remains Lane B evidence-only.
+- No governance authority assignment, compliance certification, or Lane A trust-class semantics.
+
 ## [0.1.1-report] - 2026-02-18
 
 ### Added

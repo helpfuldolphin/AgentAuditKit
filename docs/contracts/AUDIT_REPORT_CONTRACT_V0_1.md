@@ -37,8 +37,9 @@ For the same bundle bytes:
 3. `Replay Verification Summary`
 4. `Condensed Timeline`
 5. `Decision Points (Rule-Based)`
-6. `Tool Calls And Side Effects`
-7. `Explicit Non-Claims`
+6. `Psychological Context (Captured/Referenced)` (may render `- none`)
+7. `Tool Calls And Side Effects`
+8. `Explicit Non-Claims`
 
 ## Required Content Rules
 

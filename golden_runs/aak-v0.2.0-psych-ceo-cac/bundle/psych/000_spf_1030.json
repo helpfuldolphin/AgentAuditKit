@@ -1,0 +1,19 @@
+{
+  "convergence_score": 0.2,
+  "elevated_indicators": [
+    {
+      "activation_level": 70.0,
+      "category": "authority",
+      "indicator_id": "1.3"
+    },
+    {
+      "activation_level": 55.0,
+      "category": "temporal",
+      "indicator_id": "2.1"
+    }
+  ],
+  "governance_decision": "yellow_enhanced_verification",
+  "scenario": "ceo_fraud",
+  "snapshot_id": "spf_1030",
+  "timestamp": "2026-02-21T10:30:00Z"
+}

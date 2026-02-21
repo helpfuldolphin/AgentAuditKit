@@ -11,6 +11,7 @@ from pathlib import Path
 from aak.canon.hasher import EMBEDDED_HASHER, domain_hash
 from aak.canon.rfc8785 import EMBEDDED_CANONICALIZE
 from aak.models.manifest import ReplayManifest, SessionMetadata
+from aak.models.psych import PsychCaptureMode, PsychContextSource
 from aak.models.threats import ThreatFlag
 from aak.vault.store import VaultReader
 
@@ -23,6 +24,57 @@ class ExportResult:
     manifest_hash: str
     event_count: int
     threat_flags_count: int
+
+
+def _copy_optional_psych_artifacts(vault_path: Path, output_path: Path) -> int:
+    psych_source = vault_path / "psych"
+    if not psych_source.exists():
+        return 0
+    if not psych_source.is_dir():
+        raise ValueError(f"Psych artifact path is not a directory: {psych_source}")
+
+    copied_count = 0
+    for source_path in psych_source.rglob("*"):
+        if not source_path.is_file():
+            continue
+        relative_path = source_path.relative_to(vault_path)
+        destination = output_path / relative_path
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source_path, destination)
+        copied_count += 1
+    return copied_count
+
+
+def _summarize_psych_context(
+    events_source: Path,
+) -> tuple[bool, PsychCaptureMode | None, PsychContextSource | None]:
+    enabled = False
+    capture_mode: PsychCaptureMode | None = None
+    context_source: PsychContextSource | None = None
+
+    for event_file in sorted(events_source.glob("*.json")):
+        payload = json.loads(event_file.read_text(encoding="utf-8"))
+        psych_context = payload.get("psych_context")
+        if not isinstance(psych_context, dict):
+            continue
+
+        enabled = True
+        if capture_mode is None:
+            mode_value = psych_context.get("capture_mode")
+            if isinstance(mode_value, str):
+                try:
+                    capture_mode = PsychCaptureMode(mode_value)
+                except ValueError:
+                    capture_mode = None
+        if context_source is None:
+            source_value = psych_context.get("source")
+            if isinstance(source_value, str):
+                try:
+                    context_source = PsychContextSource(source_value)
+                except ValueError:
+                    context_source = None
+
+    return enabled, capture_mode, context_source
 
 
 def _generate_verify_script() -> str:
@@ -62,6 +114,29 @@ from pathlib import Path
 {EMBEDDED_HASHER}
 
 
+def _is_safe_rel_path(rel_path: str, root_dir: str) -> bool:
+    path = Path(rel_path)
+    if path.is_absolute():
+        return False
+    if ".." in path.parts:
+        return False
+    return path.parts[:1] == (root_dir,)
+
+
+def _collect_inventory(bundle_path: Path, directory: str) -> set[str]:
+    target = bundle_path / directory
+    if not target.exists():
+        return set()
+    if not target.is_dir():
+        raise ValueError(f"{{directory}} path is not a directory: {{target}}")
+
+    inventory = set()
+    for path in target.rglob("*"):
+        if path.is_file():
+            inventory.add(path.relative_to(bundle_path).as_posix())
+    return inventory
+
+
 def verify_bundle(bundle_path: Path) -> tuple[bool, str, dict]:
     """
     Verify bundle integrity.
@@ -86,13 +161,20 @@ def verify_bundle(bundle_path: Path) -> tuple[bool, str, dict]:
     if not events:
         return False, "No events in manifest", {{}}
 
+    declared_event_files = set()
+    declared_psych_artifacts = {{}}
+
     # Verify hash chain
     prev_hash = GENESIS_HASH
-    for i, event_ref in enumerate(events):
+    for event_ref in events:
         seq = event_ref.get("seq")
         expected_hash = event_ref.get("hash")
         expected_prev = event_ref.get("prev_hash")
         payload_file = event_ref.get("payload_file")
+
+        if not isinstance(payload_file, str) or not _is_safe_rel_path(payload_file, "events"):
+            return False, f"Event {{seq}}: invalid payload_file path", {{"seq": seq}}
+        declared_event_files.add(payload_file)
 
         # Check prev_hash linkage
         if expected_prev != prev_hash:
@@ -112,8 +194,46 @@ def verify_bundle(bundle_path: Path) -> tuple[bool, str, dict]:
         if computed_hash != expected_hash:
             return False, f"Event {{seq}}: hash mismatch (tampering detected)", {{"seq": seq}}
 
+        psych_context = event_data.get("psych_context")
+        if psych_context is not None:
+            if not isinstance(psych_context, dict):
+                return False, f"Event {{seq}}: psych_context must be an object", {{"seq": seq}}
+
+            artifact_path = psych_context.get("artifact_path")
+            artifact_hash = psych_context.get("artifact_hash")
+            if artifact_path is None and artifact_hash is None:
+                pass
+            elif not isinstance(artifact_path, str) or not isinstance(artifact_hash, str):
+                return (
+                    False,
+                    f"Event {{seq}}: psych_context artifact fields must be strings",
+                    {{"seq": seq}},
+                )
+            elif not _is_safe_rel_path(artifact_path, "psych"):
+                return False, f"Event {{seq}}: invalid psych artifact path", {{"seq": seq}}
+            else:
+                previous = declared_psych_artifacts.get(artifact_path)
+                if previous is not None and previous != artifact_hash:
+                    return (
+                        False,
+                        f"Event {{seq}}: conflicting psych artifact hash for {{artifact_path}}",
+                        {{"seq": seq}},
+                    )
+                declared_psych_artifacts[artifact_path] = artifact_hash
+
         # Update chain
         prev_hash = chain_hash(prev_hash, computed_hash)
+
+    actual_event_files = _collect_inventory(bundle_path, "events")
+    extra_event_files = sorted(actual_event_files - declared_event_files)
+    missing_event_files = sorted(declared_event_files - actual_event_files)
+    if extra_event_files or missing_event_files:
+        parts = []
+        if extra_event_files:
+            parts.append(f"extra event artifacts: {{', '.join(extra_event_files)}}")
+        if missing_event_files:
+            parts.append(f"missing event artifacts: {{', '.join(missing_event_files)}}")
+        return False, "; ".join(parts), {{}}
 
     # Verify chain head
     expected_head = manifest.get("chain_head")
@@ -124,8 +244,37 @@ def verify_bundle(bundle_path: Path) -> tuple[bool, str, dict]:
             {{}},
         )
 
-    msg = f"Verification passed. {{len(events)}} events, chain intact."
-    return True, msg, {{"event_count": len(events)}}
+    declared_psych_files = set(declared_psych_artifacts.keys())
+    actual_psych_files = _collect_inventory(bundle_path, "psych")
+    extra_psych_files = sorted(actual_psych_files - declared_psych_files)
+    missing_psych_files = sorted(declared_psych_files - actual_psych_files)
+    if extra_psych_files or missing_psych_files:
+        parts = []
+        if extra_psych_files:
+            parts.append(f"extra psych artifacts: {{', '.join(extra_psych_files)}}")
+        if missing_psych_files:
+            parts.append(f"missing psych artifacts: {{', '.join(missing_psych_files)}}")
+        return False, "; ".join(parts), {{}}
+
+    for artifact_path, expected_hash in sorted(declared_psych_artifacts.items()):
+        artifact_full_path = bundle_path / artifact_path
+        try:
+            artifact_payload = json.loads(artifact_full_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            return False, f"Psych artifact {{artifact_path}}: invalid JSON ({{exc}})", {{}}
+
+        computed_hash = domain_hash("manifest", artifact_payload)
+        if computed_hash != expected_hash:
+            return False, f"Psych artifact {{artifact_path}}: hash mismatch", {{}}
+
+    msg = (
+        "Verification passed. "
+        f"{{len(events)}} events, {{len(declared_psych_artifacts)}} psych artifacts, chain intact."
+    )
+    return True, msg, {{
+        "event_count": len(events),
+        "psych_artifact_count": len(declared_psych_artifacts),
+    }}
 
 
 def main() -> None:
@@ -194,6 +343,7 @@ def export_bundle(
     *,
     include_verify_script: bool = True,
     threat_flags: list[ThreatFlag] | None = None,
+    session_metadata: SessionMetadata | None = None,
 ) -> ExportResult:
     """
     Export vault to portable, self-contained bundle.
@@ -231,6 +381,28 @@ def export_bundle(
     for event_file in sorted(events_source.glob("*.json")):
         shutil.copy2(event_file, events_output / event_file.name)
 
+    psych_enabled, detected_mode, detected_source = _summarize_psych_context(events_source)
+    copied_psych_artifacts = _copy_optional_psych_artifacts(vault_path, output_path)
+    if copied_psych_artifacts > 0:
+        psych_enabled = True
+
+    metadata = session_metadata or SessionMetadata(sdk_version="0.1.0")
+    if psych_enabled:
+        metadata = metadata.model_copy(
+            update={
+                "psych_context_enabled": True,
+                "psych_contract_version": (
+                    metadata.psych_contract_version or "CPF_CONTEXT_CONTRACT_V0_2"
+                ),
+                "psych_capture_mode": (
+                    metadata.psych_capture_mode or detected_mode or PsychCaptureMode.HASH_REF
+                ),
+                "psych_source": (
+                    metadata.psych_source or detected_source or PsychContextSource.CAPTURED
+                ),
+            }
+        )
+
     # Build manifest
     envelopes = list(reader.iter_events())
 
@@ -249,9 +421,9 @@ def export_bundle(
         created_at=datetime.now(timezone.utc),
         chain_root=verification.chain_root,
         chain_head=verification.chain_head,
-        events=[e.model_dump(mode="json") for e in envelopes],  # type: ignore
+        events=[e.model_dump(mode="json") for e in envelopes],
         event_count=verification.event_count,
-        metadata=SessionMetadata(sdk_version="0.1.0"),
+        metadata=metadata,
         threat_flags=threat_flags or [],
     )
 
@@ -278,12 +450,15 @@ def export_bundle(
 Bundle ID: {run_id}
 Created:   {manifest.created_at.isoformat()}
 Events:    {verification.event_count}
+Psych:     {copied_psych_artifacts} artifact(s)
 
 VERIFICATION
 ------------
 Run: python verify.py
 
-This will verify the hash chain integrity of all events.
+This will verify:
+- hash chain integrity of all events
+- optional psych artifact references and hashes
 
 DISCLAIMER
 ----------

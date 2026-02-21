@@ -90,6 +90,7 @@ import hashlib
 DOMAINS = {
     "event": b"aak:v0:event:",
     "chain": b"aak:v0:chain:",
+    "manifest": b"aak:v0:manifest:",
 }
 
 GENESIS_HASH = hashlib.sha256(b"aak:v0:genesis").hexdigest()

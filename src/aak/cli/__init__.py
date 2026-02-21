@@ -185,6 +185,7 @@ def _handle_report_generate(args: argparse.Namespace) -> int:
     print(f"[OK] Bundle ID: {result.bundle_id}")
     print(f"[OK] Events summarized: {result.event_count}")
     print(f"[OK] Decision points: {result.decision_point_count}")
+    print(f"[OK] Psych contexts: {result.psych_context_count}")
     print(f"[OK] Report path: {result.report_path}")
     print(f"[OK] report_hash: {result.report_hash}")
     return EXIT_OK

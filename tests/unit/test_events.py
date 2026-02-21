@@ -12,6 +12,7 @@ from aak.models.events import (
     ToolResultEvent,
 )
 from aak.models.identity import ActorType, IdentityContext
+from aak.models.psych import PsychContext, PsychContextSource
 
 
 class TestEventModels:
@@ -125,3 +126,23 @@ class TestEventModels:
         assert data["event_type"] == "llm_request"
         assert data["source"] == "synthetic"
         assert data["model_id"] == "gpt-4"
+
+    def test_event_with_psych_context(self):
+        """Events can carry optional psych context references."""
+        event = LLMRequestEvent(
+            model_id="gpt-4",
+            messages=[{"role": "user", "content": "Hi"}],
+            provider="openai",
+            psych_context=PsychContext(
+                source=PsychContextSource.CAPTURED,
+                capture_mode="hash_ref",
+                snapshot_id="spf_1030",
+                convergence_score=0.2,
+                artifact_path="psych/000_spf_1030.json",
+                artifact_hash="d" * 64,
+            ),
+        )
+        data = event.model_dump(mode="json")
+        psych = data["psych_context"]
+        assert psych["snapshot_id"] == "spf_1030"
+        assert psych["capture_mode"] == "hash_ref"

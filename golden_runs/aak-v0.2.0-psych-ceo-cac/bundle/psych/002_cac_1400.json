@@ -1,0 +1,29 @@
+{
+  "convergence_score": 0.4,
+  "elevated_indicators": [
+    {
+      "activation_level": 75.0,
+      "category": "authority",
+      "indicator_id": "1.2"
+    },
+    {
+      "activation_level": 80.0,
+      "category": "cognitive",
+      "indicator_id": "5.3"
+    },
+    {
+      "activation_level": 65.0,
+      "category": "temporal",
+      "indicator_id": "2.1"
+    },
+    {
+      "activation_level": 60.0,
+      "category": "social",
+      "indicator_id": "3.4"
+    }
+  ],
+  "governance_decision": "red_escalate_cac_pattern",
+  "scenario": "command_authority_confusion",
+  "snapshot_id": "cac_1400",
+  "timestamp": "2026-02-21T14:00:00Z"
+}
