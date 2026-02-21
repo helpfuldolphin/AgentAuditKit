@@ -7,7 +7,7 @@ import secrets
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Iterator
+from typing import Any, Iterator
 
 from aak.canon.hasher import GENESIS_HASH, chain_hash, domain_hash
 from aak.canon.rfc8785 import canonicalize
@@ -331,7 +331,10 @@ class VaultReader:
                 return envelope
         return None
 
-    def get_event_payload(self, envelope: EventEnvelope) -> dict:
+    def get_event_payload(self, envelope: EventEnvelope) -> dict[str, Any]:
         """Load the actual event payload for an envelope."""
         event_file = self._vault_path / envelope.payload_file
-        return json.loads(event_file.read_text(encoding="utf-8"))
+        payload = json.loads(event_file.read_text(encoding="utf-8"))
+        if not isinstance(payload, dict):
+            raise ValueError(f"Event payload must be a JSON object: {event_file}")
+        return payload

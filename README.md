@@ -54,6 +54,7 @@ What it DOES provide:
 - OWASP Agentic (ASI) threat detection mappings
 - Portable evidence bundles with standalone verification
 - Provenance labeling (`captured` vs `synthetic`)
+- Optional CPF-style psych context references (`hash_ref` default, evidence-only)
 
 ## Lane Boundary Rule (Hard)
 
@@ -135,6 +136,7 @@ It does not imply deterministic re-execution of hosted LLMs.
 ### Models (`aak.models`)
 
 - `EventBase` with `source: captured | synthetic`
+- Optional `psych_context` on events for forensic cross-reference
 - `IdentityContext` for non-human actor tracking
 - `ThreatFlag` with OWASP ASI mappings (ASI01-ASI10)
 

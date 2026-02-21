@@ -1,0 +1,96 @@
+{
+  "version": "0.1.0",
+  "bundle_id": "run_psychceocac20260221",
+  "created_at": "2026-02-21T22:39:53.766512Z",
+  "chain_root": "e7bbcdbe0b87783ea56fe5907fa55dffde1c5c9842efae768c88ad99ff6d930c",
+  "chain_head": "874f11b98637c543ddc672adf3f1ba8aa39347caa00e97369bbf17846d468bce",
+  "events": [
+    {
+      "seq": 0,
+      "event_type": "session_start",
+      "hash": "e7bbcdbe0b87783ea56fe5907fa55dffde1c5c9842efae768c88ad99ff6d930c",
+      "prev_hash": "b2579e3d199750f127bce99b124b38eb4f17da770294c8ff40bf8e83b3c4e131",
+      "timestamp": "2026-02-21T10:29:50Z",
+      "payload_file": "events/000_session_start.json"
+    },
+    {
+      "seq": 1,
+      "event_type": "llm_request",
+      "hash": "00bff3810bb81688436ea1d0c614e1b95b83b3f0d4005422ef8bc6b940237c38",
+      "prev_hash": "3b59c03475cfe5494bf05ee8b62468a271f07d544206e2f8356f0de7ea32e031",
+      "timestamp": "2026-02-21T10:30:00Z",
+      "payload_file": "events/001_llm_request.json"
+    },
+    {
+      "seq": 2,
+      "event_type": "llm_response",
+      "hash": "70e268e12555f47933010cf9990f9d3f5ea326bf96d91c44f5a8eec427cd63f6",
+      "prev_hash": "9f9a6301ae95d364e8645bb9d42825eefcdfa3679a7abd69adf10864310805dc",
+      "timestamp": "2026-02-21T10:30:06Z",
+      "payload_file": "events/002_llm_response.json"
+    },
+    {
+      "seq": 3,
+      "event_type": "llm_request",
+      "hash": "c4fc03b6acd7dc8aa6c02d669df5956c942f756331967a05e0f6cfab0826ad60",
+      "prev_hash": "d298dff2d67e8b84de353e10d365e7f21de908e6c1539f8f62d0921a44d752c9",
+      "timestamp": "2026-02-21T11:00:00Z",
+      "payload_file": "events/003_llm_request.json"
+    },
+    {
+      "seq": 4,
+      "event_type": "llm_response",
+      "hash": "1356727d00995daabaa7a60cf419b6f12e5f684e15adc8e454dae44c62662fd7",
+      "prev_hash": "e53819f336c4d5fdb95f978c7e4eb65a781bfe5dfc1e051f6f5faf806af4cae5",
+      "timestamp": "2026-02-21T11:00:08Z",
+      "payload_file": "events/004_llm_response.json"
+    },
+    {
+      "seq": 5,
+      "event_type": "llm_request",
+      "hash": "01e7137e25fcbcba56565ed5c04f71167a0206d4f67584aac022e03796a76e59",
+      "prev_hash": "23e04fb84b941764f47b519306c72ca692c229045ad0c76f5733b5e461b1cb15",
+      "timestamp": "2026-02-21T14:00:00Z",
+      "payload_file": "events/005_llm_request.json"
+    },
+    {
+      "seq": 6,
+      "event_type": "tool_call",
+      "hash": "8cc31cec3374e4c496ab728ab6d87df26d339a675b70c4b5206f4135541bc771",
+      "prev_hash": "c60b6c38f8791bc39c3c3ab0566f01ef9fd239c4b2c57a0981911fbc9de1fae0",
+      "timestamp": "2026-02-21T14:00:05Z",
+      "payload_file": "events/006_tool_call.json"
+    },
+    {
+      "seq": 7,
+      "event_type": "tool_result",
+      "hash": "107de94222101cfccca4bfa009b90ec47b65009a01637dfcc9cff3f5047d9019",
+      "prev_hash": "42456b7fd5792f159f4931e6acb4ad5e2b6f84d03b09e15eeb45e3424fceb3e6",
+      "timestamp": "2026-02-21T14:00:06Z",
+      "payload_file": "events/007_tool_result.json"
+    },
+    {
+      "seq": 8,
+      "event_type": "llm_response",
+      "hash": "baa371b7635e40322c865858d32d3cda8aea0d9ab4a338699af94b4d970231a6",
+      "prev_hash": "b27e61383f4891e75ab26a811cf7e4ee97f0f5e1df8d130daa6c6c0355b2e30e",
+      "timestamp": "2026-02-21T14:00:09Z",
+      "payload_file": "events/008_llm_response.json"
+    }
+  ],
+  "event_count": 9,
+  "metadata": {
+    "model_id": null,
+    "provider": null,
+    "sampling_params": {},
+    "sdk_version": "0.1.0",
+    "interceptor_config": {},
+    "psych_context_enabled": true,
+    "psych_contract_version": "CPF_CONTEXT_CONTRACT_V0_2",
+    "psych_provider": "cpf_orchestrator_sim",
+    "psych_capture_mode": "hash_ref",
+    "psych_source": "synthetic"
+  },
+  "threat_flags": [],
+  "disclaimer": "EVIDENCE ARTIFACT: This bundle is a forensic evidence artifact, NOT a compliance certification. Findings are heuristic-based. Hosted LLMs are non-deterministic; replay may produce different outputs. For governance-grade verification, see Lane A (MathLedger)."
+}

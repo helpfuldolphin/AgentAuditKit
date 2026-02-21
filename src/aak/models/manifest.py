@@ -8,6 +8,7 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from aak.models.events import EventEnvelope
+from aak.models.psych import PsychCaptureMode, PsychContextSource
 from aak.models.threats import ThreatFlag
 
 
@@ -19,6 +20,11 @@ class SessionMetadata(BaseModel):
     sampling_params: dict[str, float | int | None] = Field(default_factory=dict)
     sdk_version: str
     interceptor_config: dict[str, Any] = Field(default_factory=dict)
+    psych_context_enabled: bool = False
+    psych_contract_version: str | None = None
+    psych_provider: str | None = None
+    psych_capture_mode: PsychCaptureMode | None = None
+    psych_source: PsychContextSource | None = None
 
     model_config = {"extra": "forbid"}
 

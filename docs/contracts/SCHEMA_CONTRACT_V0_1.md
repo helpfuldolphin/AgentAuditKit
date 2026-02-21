@@ -50,11 +50,21 @@ Expected exported structure:
 - `verify.py`
 - `README.txt`
 
+Optional v0.2 extension artifacts (when psych context references are present):
+
+- `psych/**/*.json`
+
 Verification policy:
 
 - Fail closed on missing referenced payloads
 - Fail closed on modified payload hashes
 - Fail closed on extra files in `events/` not declared in manifest
+
+If psych artifacts are referenced by event payloads:
+
+- Fail closed on missing referenced psych artifacts
+- Fail closed on modified psych artifact hashes
+- Fail closed on extra files in `psych/` not referenced by event payloads
 
 ## Naming Compatibility Rule
 

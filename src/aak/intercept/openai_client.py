@@ -7,9 +7,10 @@ This wrapper intercepts OpenAI API calls and records them to the vault.
 from __future__ import annotations
 
 import time
-from typing import TYPE_CHECKING, Any, Callable
+from typing import Any, Callable, Protocol
 
 from aak.canon.hasher import domain_hash
+from aak.intercept.psych_provider import PsychContextProvider
 from aak.models.events import (
     EventSource,
     LLMRequestEvent,
@@ -18,11 +19,23 @@ from aak.models.events import (
     ToolResultEvent,
 )
 from aak.models.identity import IdentityContext
+from aak.models.psych import PsychContext
 from aak.vault.store import VaultWriter
 
-if TYPE_CHECKING:
-    from openai import OpenAI
-    from openai.types.chat import ChatCompletion
+
+class _OpenAICompletionsProtocol(Protocol):
+    def create(self, **kwargs: Any) -> Any:
+        """OpenAI completions call surface used by AAK."""
+
+
+class _OpenAIChatProtocol(Protocol):
+    completions: _OpenAICompletionsProtocol
+
+
+class OpenAIClientProtocol(Protocol):
+    """Minimal OpenAI client surface required for interception."""
+
+    chat: _OpenAIChatProtocol
 
 
 class CapturedOpenAI:
@@ -48,10 +61,11 @@ class CapturedOpenAI:
 
     def __init__(
         self,
-        client: OpenAI,
+        client: OpenAIClientProtocol,
         vault_path: str,
         identity_context: IdentityContext | None = None,
         source: EventSource = EventSource.CAPTURED,
+        psych_context_provider: PsychContextProvider | None = None,
     ) -> None:
         """
         Initialize captured OpenAI client.
@@ -61,11 +75,13 @@ class CapturedOpenAI:
             vault_path: Path to store captured events.
             identity_context: Identity context for captured events.
             source: Event source (captured or synthetic).
+            psych_context_provider: Optional provider for psych context snapshots.
         """
         self._client = client
         self._vault = VaultWriter(vault_path)
         self._identity_context = identity_context
         self._source = source
+        self._psych_context_provider = psych_context_provider
         self._last_request_hash: str | None = None
 
         # Create a chat.completions-like interface
@@ -90,9 +106,20 @@ class CapturedOpenAI:
         """
         return self._vault.finalize()
 
-    def get_underlying_client(self) -> OpenAI:
+    def get_underlying_client(self) -> OpenAIClientProtocol:
         """Return the underlying OpenAI client."""
         return self._client
+
+    def _get_psych_context(self) -> PsychContext | None:
+        provider = self._psych_context_provider
+        if provider is None:
+            return None
+        context = provider.get_current_context()
+        if context is None:
+            return None
+        if isinstance(context, PsychContext):
+            return context
+        return PsychContext.model_validate(context)
 
 
 class _ChatNamespace:
@@ -109,7 +136,7 @@ class _CompletionsNamespace:
     def __init__(self, captured: CapturedOpenAI) -> None:
         self._captured = captured
 
-    def create(self, **kwargs: Any) -> ChatCompletion:
+    def create(self, **kwargs: Any) -> Any:
         """
         Create a chat completion and record to vault.
 
@@ -137,6 +164,7 @@ class _CompletionsNamespace:
             tool_choice=tool_choice,
             provider="openai",
             identity_context=self._captured._identity_context,
+            psych_context=self._captured._get_psych_context(),
             source=self._captured._source,
         )
         request_envelope = self._captured._vault.append_event(request_event)
@@ -179,6 +207,7 @@ class _CompletionsNamespace:
             provider_request_id=response.id,
             latency_ms=latency_ms,
             identity_context=self._captured._identity_context,
+            psych_context=self._captured._get_psych_context(),
             source=self._captured._source,
         )
         self._captured._vault.append_event(response_event)
@@ -201,6 +230,7 @@ class ToolRouter:
         vault: VaultWriter,
         identity_context: IdentityContext | None = None,
         source: EventSource = EventSource.CAPTURED,
+        psych_context_provider: PsychContextProvider | None = None,
     ) -> None:
         """
         Initialize tool router.
@@ -209,12 +239,25 @@ class ToolRouter:
             vault: Vault writer for recording.
             identity_context: Identity context for events.
             source: Event source (captured or synthetic).
+            psych_context_provider: Optional provider for psych context snapshots.
         """
         self._vault = vault
         self._identity_context = identity_context
         self._source = source
+        self._psych_context_provider = psych_context_provider
         self._tools: dict[str, Callable[..., Any]] = {}
         self._last_response_seq: int | None = None
+
+    def _get_psych_context(self) -> PsychContext | None:
+        provider = self._psych_context_provider
+        if provider is None:
+            return None
+        context = provider.get_current_context()
+        if context is None:
+            return None
+        if isinstance(context, PsychContext):
+            return context
+        return PsychContext.model_validate(context)
 
     def register(self, name: str, fn: Callable[..., Any]) -> None:
         """Register a tool function."""
@@ -255,6 +298,7 @@ class ToolRouter:
             tool_input_hash=domain_hash("tool_call", arguments),
             triggered_by_seq=triggered_by_seq or self._last_response_seq,
             identity_context=self._identity_context,
+            psych_context=self._get_psych_context(),
             source=self._source,
         )
         call_envelope = self._vault.append_event(call_event)
@@ -282,6 +326,7 @@ class ToolRouter:
             error_message=error_message,
             call_seq=call_envelope.seq,
             identity_context=self._identity_context,
+            psych_context=self._get_psych_context(),
             source=self._source,
         )
         self._vault.append_event(result_event)
@@ -290,11 +335,12 @@ class ToolRouter:
 
 
 def intercept_openai(
-    client: OpenAI,
+    client: OpenAIClientProtocol,
     vault_path: str,
     *,
     identity_context: IdentityContext | None = None,
     source: EventSource = EventSource.CAPTURED,
+    psych_context_provider: PsychContextProvider | None = None,
 ) -> CapturedOpenAI:
     """
     Wrap an OpenAI client to capture all calls.
@@ -304,6 +350,7 @@ def intercept_openai(
         vault_path: Path to store captured events.
         identity_context: Identity context for captured events.
         source: Event source (captured or synthetic).
+        psych_context_provider: Optional provider for psych context snapshots.
 
     Returns:
         Wrapped client that records to vault.
@@ -313,4 +360,5 @@ def intercept_openai(
         vault_path=vault_path,
         identity_context=identity_context,
         source=source,
+        psych_context_provider=psych_context_provider,
     )

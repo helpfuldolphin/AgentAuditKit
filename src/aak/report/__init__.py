@@ -30,6 +30,7 @@ class ReportGenerationResult:
     bundle_id: str
     event_count: int
     decision_point_count: int
+    psych_context_count: int
     report_hash: str
     output_dir: Path
     report_path: Path
@@ -134,6 +135,31 @@ def _build_tool_and_side_effect_lines(timeline: ReplayTimeline) -> list[str]:
     return lines
 
 
+def _build_psych_context_lines(timeline: ReplayTimeline) -> list[str]:
+    lines: list[str] = []
+    for frame in timeline.frames:
+        payload = frame.payload
+        psych_context = payload.get("psych_context")
+        if not isinstance(psych_context, dict):
+            continue
+
+        lines.append(
+            (
+                f"- seq={frame.seq:03d} | "
+                f"snapshot_id={_string_or_unknown(psych_context.get('snapshot_id'))} | "
+                f"source={_string_or_unknown(psych_context.get('source'))} | "
+                f"capture_mode={_string_or_unknown(psych_context.get('capture_mode'))} | "
+                f"convergence_score={_string_or_unknown(psych_context.get('convergence_score'))} | "
+                f"psych_root_hash={_string_or_unknown(psych_context.get('psych_root_hash'))} | "
+                f"artifact_path={_string_or_unknown(psych_context.get('artifact_path'))} | "
+                f"artifact_hash={_string_or_unknown(psych_context.get('artifact_hash'))}"
+            )
+        )
+    if not lines:
+        return ["- none"]
+    return lines
+
+
 def _build_timeline_lines(timeline: ReplayTimeline) -> list[str]:
     lines: list[str] = []
     for frame in timeline.frames:
@@ -154,6 +180,7 @@ def _render_report(
     timeline: ReplayTimeline,
     verify_message: str,
     decision_lines: list[str],
+    psych_lines: list[str],
 ) -> str:
     metadata = manifest.get("metadata") if isinstance(manifest.get("metadata"), dict) else {}
     assert isinstance(metadata, dict)
@@ -196,6 +223,9 @@ def _render_report(
         "## Decision Points (Rule-Based)",
         *decision_lines,
         "",
+        "## Psychological Context (Captured/Referenced)",
+        *psych_lines,
+        "",
         "## Tool Calls And Side Effects",
         *_build_tool_and_side_effect_lines(timeline),
         "",
@@ -229,8 +259,12 @@ def generate_audit_report(
 
     manifest = _load_manifest(bundle_path_obj)
     decision_lines = _build_decision_point_lines(timeline)
+    psych_lines = _build_psych_context_lines(timeline)
     decision_point_count = 0 if decision_lines == ["- none"] else len(decision_lines)
-    report_text = _render_report(manifest, timeline, verification.message, decision_lines)
+    psych_context_count = 0 if psych_lines == ["- none"] else len(psych_lines)
+    report_text = _render_report(
+        manifest, timeline, verification.message, decision_lines, psych_lines
+    )
 
     output_dir = Path(out_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -242,6 +276,7 @@ def generate_audit_report(
         bundle_id=timeline.bundle_id,
         event_count=len(timeline.frames),
         decision_point_count=decision_point_count,
+        psych_context_count=psych_context_count,
         report_hash=report_hash,
         output_dir=output_dir,
         report_path=report_path,

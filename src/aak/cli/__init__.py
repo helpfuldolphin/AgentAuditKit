@@ -23,13 +23,11 @@ NON_CLAIMS = (
     "certification, governance authority, or deterministic hosted-LLM output reproduction."
 )
 
+
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="aak",
-        description=(
-            "Agent Audit Kit CLI. Lane B forensic tooling only. "
-            f"{NON_CLAIMS}"
-        ),
+        description=(f"Agent Audit Kit CLI. Lane B forensic tooling only. {NON_CLAIMS}"),
     )
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
 
@@ -185,6 +183,7 @@ def _handle_report_generate(args: argparse.Namespace) -> int:
     print(f"[OK] Bundle ID: {result.bundle_id}")
     print(f"[OK] Events summarized: {result.event_count}")
     print(f"[OK] Decision points: {result.decision_point_count}")
+    print(f"[OK] Psych contexts: {result.psych_context_count}")
     print(f"[OK] Report path: {result.report_path}")
     print(f"[OK] report_hash: {result.report_hash}")
     return EXIT_OK

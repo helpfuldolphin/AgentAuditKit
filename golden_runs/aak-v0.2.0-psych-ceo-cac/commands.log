@@ -1,0 +1,5 @@
+python examples/generate_psych_golden_run.py --out golden_runs\aak-v0.2.0-psych-ceo-cac
+python -m aak.cli replay verify --bundle golden_runs\aak-v0.2.0-psych-ceo-cac\bundle
+python -m aak.cli stress run --bundle golden_runs\aak-v0.2.0-psych-ceo-cac\bundle --profile authority --seed 11
+python -m aak.cli report generate --bundle golden_runs\aak-v0.2.0-psych-ceo-cac\bundle --out golden_runs\aak-v0.2.0-psych-ceo-cac\report
+cd golden_runs\aak-v0.2.0-psych-ceo-cac\bundle && python verify.py

@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from aak.canon.hasher import GENESIS_HASH, chain_hash, domain_hash
+from aak.models.psych import psych_artifact_hash
 
 REPLAY_CLOCK_POLICY = "seq_asc_then_manifest_timestamp"
 
@@ -107,6 +108,15 @@ def _is_safe_payload_path(payload_file: str) -> bool:
     return path.parts[:1] == ("events",)
 
 
+def _is_safe_psych_path(artifact_path: str) -> bool:
+    path = Path(artifact_path)
+    if path.is_absolute():
+        return False
+    if ".." in path.parts:
+        return False
+    return path.parts[:1] == ("psych",)
+
+
 def _load_manifest(bundle_path: Path) -> dict[str, Any]:
     manifest_path = bundle_path / "replay_manifest.json"
     if not manifest_path.exists():
@@ -136,6 +146,20 @@ def _collect_events_inventory(events_dir: Path) -> set[str]:
     if not events_dir.is_dir():
         raise ReplayError(f"Events path is not a directory: {events_dir}")
     return {f"events/{entry.name}" for entry in events_dir.iterdir() if entry.is_file()}
+
+
+def _collect_optional_inventory(bundle_path: Path, directory: str) -> set[str]:
+    target_dir = bundle_path / directory
+    if not target_dir.exists():
+        return set()
+    if not target_dir.is_dir():
+        raise ReplayError(f"{directory} path is not a directory: {target_dir}")
+
+    inventory: set[str] = set()
+    for entry in target_dir.rglob("*"):
+        if entry.is_file():
+            inventory.add(entry.relative_to(bundle_path).as_posix())
+    return inventory
 
 
 def _normalize_and_validate_events(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -206,6 +230,7 @@ def _verify_and_collect(
             raise ReplayError("; ".join(message_parts))
 
         frames_payloads: list[dict[str, Any]] = []
+        declared_psych_artifacts: dict[str, str] = {}
         prev_hash = GENESIS_HASH
         chain_root = GENESIS_HASH
 
@@ -232,6 +257,28 @@ def _verify_and_collect(
             if seq == 0:
                 chain_root = computed_hash
 
+            psych_context = payload.get("psych_context")
+            if psych_context is not None:
+                if not isinstance(psych_context, dict):
+                    raise ReplayError(f"Event {seq}: psych_context must be an object")
+                artifact_path = psych_context.get("artifact_path")
+                artifact_hash = psych_context.get("artifact_hash")
+                if artifact_path is None and artifact_hash is None:
+                    pass
+                elif not isinstance(artifact_path, str) or not isinstance(artifact_hash, str):
+                    raise ReplayError(
+                        f"Event {seq}: psych_context artifact_path/artifact_hash must be strings"
+                    )
+                elif not _is_safe_psych_path(artifact_path):
+                    raise ReplayError(f"Event {seq}: invalid psych artifact_path: {artifact_path}")
+                else:
+                    existing_hash = declared_psych_artifacts.get(artifact_path)
+                    if existing_hash is not None and existing_hash != artifact_hash:
+                        raise ReplayError(
+                            f"Event {seq}: conflicting psych artifact hash for {artifact_path}"
+                        )
+                    declared_psych_artifacts[artifact_path] = artifact_hash
+
             prev_hash = chain_hash(prev_hash, computed_hash)
             if include_payloads:
                 frames_payloads.append(payload)
@@ -243,6 +290,30 @@ def _verify_and_collect(
         expected_chain_root = str(manifest["chain_root"])
         if chain_root != expected_chain_root:
             raise ReplayError("Chain root mismatch")
+
+        actual_psych_files = _collect_optional_inventory(bundle_path, "psych")
+        declared_psych_files = set(declared_psych_artifacts.keys())
+
+        extra_psych_files = sorted(actual_psych_files - declared_psych_files)
+        missing_psych_files = sorted(declared_psych_files - actual_psych_files)
+        if extra_psych_files or missing_psych_files:
+            message_parts = []
+            if extra_psych_files:
+                message_parts.append(f"extra psych artifacts: {', '.join(extra_psych_files)}")
+            if missing_psych_files:
+                message_parts.append(f"missing psych artifacts: {', '.join(missing_psych_files)}")
+            raise ReplayError("; ".join(message_parts))
+
+        for artifact_path, expected_hash in sorted(declared_psych_artifacts.items()):
+            artifact_full_path = bundle_path / artifact_path
+            try:
+                artifact_payload = json.loads(artifact_full_path.read_text(encoding="utf-8"))
+            except json.JSONDecodeError as exc:
+                raise ReplayError(f"Psych artifact {artifact_path}: invalid JSON ({exc})") from exc
+
+            computed_artifact_hash = psych_artifact_hash(artifact_payload)
+            if computed_artifact_hash != expected_hash:
+                raise ReplayError(f"Psych artifact {artifact_path}: hash mismatch")
 
         return (
             ReplayVerificationResult(
