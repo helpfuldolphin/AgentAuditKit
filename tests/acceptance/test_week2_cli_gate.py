@@ -117,9 +117,7 @@ def test_capture_run_creates_bundle_and_verifies(tmp_path: Path):
     config_path = tmp_path / "aak.yaml"
     config_path.write_text("runtime: declared\n", encoding="utf-8")
 
-    capture = _run_cli(
-        ["capture", "run", "--config", str(config_path), "--out", str(output_dir)]
-    )
+    capture = _run_cli(["capture", "run", "--config", str(config_path), "--out", str(output_dir)])
     assert capture.returncode == 0
     assert (output_dir / "bundle" / "replay_manifest.json").exists()
 

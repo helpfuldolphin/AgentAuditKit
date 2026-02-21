@@ -23,13 +23,11 @@ NON_CLAIMS = (
     "certification, governance authority, or deterministic hosted-LLM output reproduction."
 )
 
+
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="aak",
-        description=(
-            "Agent Audit Kit CLI. Lane B forensic tooling only. "
-            f"{NON_CLAIMS}"
-        ),
+        description=(f"Agent Audit Kit CLI. Lane B forensic tooling only. {NON_CLAIMS}"),
     )
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
 

@@ -7,7 +7,7 @@ This wrapper intercepts OpenAI API calls and records them to the vault.
 from __future__ import annotations
 
 import time
-from typing import TYPE_CHECKING, Any, Callable
+from typing import Any, Callable, Protocol
 
 from aak.canon.hasher import domain_hash
 from aak.intercept.psych_provider import PsychContextProvider
@@ -22,9 +22,20 @@ from aak.models.identity import IdentityContext
 from aak.models.psych import PsychContext
 from aak.vault.store import VaultWriter
 
-if TYPE_CHECKING:
-    from openai import OpenAI
-    from openai.types.chat import ChatCompletion
+
+class _OpenAICompletionsProtocol(Protocol):
+    def create(self, **kwargs: Any) -> Any:
+        """OpenAI completions call surface used by AAK."""
+
+
+class _OpenAIChatProtocol(Protocol):
+    completions: _OpenAICompletionsProtocol
+
+
+class OpenAIClientProtocol(Protocol):
+    """Minimal OpenAI client surface required for interception."""
+
+    chat: _OpenAIChatProtocol
 
 
 class CapturedOpenAI:
@@ -50,7 +61,7 @@ class CapturedOpenAI:
 
     def __init__(
         self,
-        client: OpenAI,
+        client: OpenAIClientProtocol,
         vault_path: str,
         identity_context: IdentityContext | None = None,
         source: EventSource = EventSource.CAPTURED,
@@ -95,7 +106,7 @@ class CapturedOpenAI:
         """
         return self._vault.finalize()
 
-    def get_underlying_client(self) -> OpenAI:
+    def get_underlying_client(self) -> OpenAIClientProtocol:
         """Return the underlying OpenAI client."""
         return self._client
 
@@ -125,7 +136,7 @@ class _CompletionsNamespace:
     def __init__(self, captured: CapturedOpenAI) -> None:
         self._captured = captured
 
-    def create(self, **kwargs: Any) -> ChatCompletion:
+    def create(self, **kwargs: Any) -> Any:
         """
         Create a chat completion and record to vault.
 
@@ -324,7 +335,7 @@ class ToolRouter:
 
 
 def intercept_openai(
-    client: OpenAI,
+    client: OpenAIClientProtocol,
     vault_path: str,
     *,
     identity_context: IdentityContext | None = None,
