@@ -1,0 +1,107 @@
+\documentclass[11pt]{article}
+\usepackage[letterpaper,margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{enumitem}
+\usepackage{array}
+\setlist{leftmargin=1.25em}
+
+\title{\textbf{AI Decision Exposure Brief}}
+\author{Agent Audit Kit (AAK)}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\noindent\textbf{Audience:} Regional bank CTO/CISO, risk, internal audit, and technology leadership.
+
+\section*{Executive Summary}
+Most institutions now have AI-assisted workflows in operations, support, underwriting, fraud review, or internal analysis. The operational risk is not only model quality. The larger risk is \textit{decision exposure}: if an AI-linked decision is challenged, can your team reconstruct what happened in a defensible way?
+
+\medskip
+\noindent Many teams can produce logs. Fewer can produce a replayable, tamper-evident decision lineage that stands up under incident response, legal review, or regulator scrutiny.
+
+\section*{The Core Gap}
+\textbf{Logging} answers: ``what events were recorded?''\\
+\textbf{Defensible lineage} answers: ``can we reproduce the exact path of prompts, tool calls, and outputs, and prove artifacts were not silently altered?''
+\newline
+\textit{Including multi-turn psychological convergence patterns (authority + urgency + social proof) that traditional logs miss.}
+
+\medskip
+\noindent In practice, the gap appears when teams must answer:
+\begin{itemize}
+  \item Why did this automated action occur?
+  \item Which external tools and data sources influenced the outcome?
+  \item What evidence is missing today if this decision is disputed?
+  \item Could we reproduce this review path tomorrow with confidence?
+\end{itemize}
+
+\section*{What We Do}
+We provide a fixed-scope \textbf{AI Decision Exposure Review} for one selected workflow.
+
+\begin{itemize}
+  \item Map one real workflow where AI influences a material decision.
+  \item Capture and reconstruct decision lineage using deterministic replay methods.
+  \item Identify irreversible actions, external side effects, and evidence gaps.
+  \item Produce a concise, executive-readable exposure report with concrete next steps.
+\end{itemize}
+\noindent\textbf{Reference scenario baseline:} Validated in deterministic synthetic CEO-fraud and Command Authority Confusion scenarios matching financial services attack patterns. Live workflow validation is conducted per-client during engagement.
+
+\section*{What We Do Not Claim}
+\begin{itemize}
+  \item We do \textbf{not} certify compliance.
+  \item We do \textbf{not} claim model correctness or safety.
+  \item We do \textbf{not} infer intent.
+  \item We do \textbf{not} replace legal, compliance, or internal audit functions.
+\end{itemize}
+
+\section*{Engagement Structure (Fixed Scope)}
+\textbf{Duration:} 1--2 weeks\\
+\textbf{Format:} Document review + workflow walk-through + technical evidence pass\\
+\textbf{Primary Output:} AI Decision Exposure Report
+
+\medskip
+\noindent Typical report sections:
+\begin{itemize}
+  \item Workflow boundaries (where AI influences decisions)
+  \item Data ingress and egress points
+  \item High-impact decision points and irreversible actions
+  \item Current replay and evidence-readiness score (practical, not theoretical)
+  \item Deterministic narrative report + Mermaid convergence timeline + golden-run comparison
+  \item Prioritized remediation actions (30/60/90 day)
+\end{itemize}
+
+\section*{Example Decision Convergence Timeline}
+\noindent The delivered exposure report includes a decision-timeline table in this format:
+
+\medskip
+\begin{center}
+\begingroup\small
+\begin{tabular}{|>{\raggedright\arraybackslash}m{1.35cm}|>{\raggedright\arraybackslash}m{1.55cm}|>{\raggedright\arraybackslash}m{1.45cm}|>{\raggedright\arraybackslash}m{1.25cm}|>{\raggedright\arraybackslash}m{1.15cm}|>{\raggedright\arraybackslash}m{1.55cm}|>{\raggedright\arraybackslash}m{1.9cm}|}
+\hline
+\textbf{Time} & \textbf{Authority} & \textbf{Temporal} & \textbf{Social} & \textbf{Conv.} & \textbf{Risk} & \textbf{Action} \\
+\hline
+10:30 & 70\% & 55\% & --- & 0.15 & YELLOW & Enhanced review \\
+\hline
+11:00 & 61.6\% & 75\% & --- & 0.20 & RED & Blocked \\
+\hline
+11:15 & 65\% & 66.3\% & 68\% & 0.30 & CRITICAL & SOC alert \\
+\hline
+\end{tabular}
+\endgroup
+\end{center}
+
+\section*{Investment}
+\textbf{Pilot range:} \$2,500--\$5,000 per workflow review, fixed fee.
+
+\medskip
+\noindent This price point is designed for rapid internal approval and practical decision-making, without committing to a platform purchase.
+
+\section*{Decision Question for Leadership}
+\textbf{If one AI-influenced decision is challenged next quarter, can we prove what happened with evidence that is complete, replayable, and defensible?}
+
+\medskip
+\noindent If the answer is uncertain, this review is intended to close that gap quickly and concretely.
+
+\end{document}
