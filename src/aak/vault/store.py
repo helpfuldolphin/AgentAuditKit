@@ -46,10 +46,10 @@ class VaultWriter:
     The hash chain links each event to its predecessor.
     """
 
-    def __init__(self, vault_path: str | Path) -> None:
+    def __init__(self, vault_path: str | Path, *, run_id: str | None = None) -> None:
         self._vault_path = Path(vault_path)
         self._events_path = self._vault_path / "events"
-        self._run_id = f"run_{secrets.token_hex(8)}"
+        self._run_id = run_id or f"run_{secrets.token_hex(8)}"
         self._seq = 0
         self._prev_hash = GENESIS_HASH
         self._chain_root: str | None = None

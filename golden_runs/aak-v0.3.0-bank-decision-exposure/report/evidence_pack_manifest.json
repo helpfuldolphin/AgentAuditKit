@@ -1,0 +1,33 @@
+{
+  "bundle_copy_path": "bundle",
+  "bundle_id": "run_36739dd5b370869b",
+  "decision_context_count": 10,
+  "decision_point_count": 6,
+  "generated_files": [
+    {
+      "artifact_hash": "320a8df84f8997081466ac966ca7fdb942094bd0a9e623fe75f8334a371120fb",
+      "path": "audit_report.md"
+    },
+    {
+      "artifact_hash": "4935cb8745ab91667385fe4f473fa5db2d9650b036b11d7f8dd35c465fdf9fda",
+      "path": "temporal_narrative.md"
+    },
+    {
+      "artifact_hash": "87c5b782d6faaa62077de3b032571eed49cdaa319102e897ff5be76f8dae94f1",
+      "path": "counterfactual_checklist.md"
+    },
+    {
+      "artifact_hash": "9454b1d3c83302ee02f8d6f2070de347b02e4a14db679b9072501688077baba3",
+      "path": "decision_context_chain.json"
+    },
+    {
+      "artifact_hash": "960d053849fab80594aa3b4f32cc046de8ef92647b56a52b4f8f7eef9b36ba74",
+      "path": "decision_timeline.mmd"
+    }
+  ],
+  "psych_context_count": 0,
+  "report_hash": "21024383109af9bda45785e5285ec3bb558f103a20eb31ae18ad337737c64c53",
+  "timeline_hash": "8a46fa44fb8b6516b7f287cb72b2c29ae10c1a6525cfb7bbe9a501934420bd95",
+  "verifier_evidence_count": 0,
+  "version": "0.3.0"
+}

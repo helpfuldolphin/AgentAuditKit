@@ -1,0 +1,24 @@
+flowchart TD
+    title["AAK Decision Timeline: run_36739dd5b370869b"]
+    n000["000 | 2026-03-20T14:00:00Z<br/>session_start<br/>event recorded"]
+    title --> n000
+    n001["001 | 2026-03-20T14:00:02Z<br/>llm_request<br/>Review high-value vendor wire release request"]
+    n000 --> n001
+    n002["002 | 2026-03-20T14:00:03Z<br/>llm_response<br/>Review high-value vendor wire release request"]
+    n001 --> n002
+    n003["003 | 2026-03-20T14:00:05Z<br/>tool_call<br/>Inspect vendor profile and beneficiary change details"]
+    n002 --> n003
+    n004["004 | 2026-03-20T14:00:06Z<br/>tool_result<br/>Inspect vendor profile and beneficiary change details"]
+    n003 --> n004
+    n005["005 | 2026-03-20T14:00:08Z<br/>llm_request<br/>Evaluate release controls against recorded risk factors"]
+    n004 --> n005
+    n006["006 | 2026-03-20T14:00:09Z<br/>llm_response<br/>Evaluate release controls against recorded risk factors"]
+    n005 --> n006
+    n007["007 | 2026-03-20T14:00:10Z<br/>tool_call<br/>Evaluate release controls against recorded risk factors"]
+    n006 --> n007
+    n008["008 | 2026-03-20T14:00:11Z<br/>tool_result<br/>Evaluate release controls against recorded risk factors"]
+    n007 --> n008
+    n009["009 | 2026-03-20T14:00:13Z<br/>llm_request<br/>Issue hold/review recommendation before funds movement"]
+    n008 --> n009
+    n010["010 | 2026-03-20T14:00:14Z<br/>llm_response<br/>Issue hold/review recommendation before funds movement"]
+    n009 --> n010

@@ -7,10 +7,13 @@ This wrapper intercepts OpenAI API calls and records them to the vault.
 from __future__ import annotations
 
 import time
+from datetime import datetime, timezone
 from typing import Any, Callable, Protocol
 
 from aak.canon.hasher import domain_hash
+from aak.intercept.decision_context_provider import DecisionContextProvider
 from aak.intercept.psych_provider import PsychContextProvider
+from aak.models.decision import DecisionContextSnapshot
 from aak.models.events import (
     EventSource,
     LLMRequestEvent,
@@ -65,7 +68,10 @@ class CapturedOpenAI:
         vault_path: str,
         identity_context: IdentityContext | None = None,
         source: EventSource = EventSource.CAPTURED,
+        decision_context_provider: DecisionContextProvider | None = None,
         psych_context_provider: PsychContextProvider | None = None,
+        run_id: str | None = None,
+        timestamp_provider: Callable[[], datetime] | None = None,
     ) -> None:
         """
         Initialize captured OpenAI client.
@@ -75,13 +81,18 @@ class CapturedOpenAI:
             vault_path: Path to store captured events.
             identity_context: Identity context for captured events.
             source: Event source (captured or synthetic).
+            decision_context_provider: Optional provider for decision context snapshots.
             psych_context_provider: Optional provider for psych context snapshots.
+            run_id: Optional fixed capture session ID.
+            timestamp_provider: Optional event timestamp provider.
         """
         self._client = client
-        self._vault = VaultWriter(vault_path)
+        self._vault = VaultWriter(vault_path, run_id=run_id)
         self._identity_context = identity_context
         self._source = source
+        self._decision_context_provider = decision_context_provider
         self._psych_context_provider = psych_context_provider
+        self._timestamp_provider = timestamp_provider
         self._last_request_hash: str | None = None
 
         # Create a chat.completions-like interface
@@ -120,6 +131,23 @@ class CapturedOpenAI:
         if isinstance(context, PsychContext):
             return context
         return PsychContext.model_validate(context)
+
+    def _current_timestamp(self) -> datetime:
+        provider = self._timestamp_provider
+        if provider is None:
+            return datetime.now(timezone.utc)
+        return provider()
+
+    def _get_decision_context(self) -> DecisionContextSnapshot | None:
+        provider = self._decision_context_provider
+        if provider is None:
+            return None
+        context = provider.get_current_context()
+        if context is None:
+            return None
+        if isinstance(context, DecisionContextSnapshot):
+            return context
+        return DecisionContextSnapshot.model_validate(context)
 
 
 class _ChatNamespace:
@@ -162,8 +190,10 @@ class _CompletionsNamespace:
             seed=seed,
             tools=tools,
             tool_choice=tool_choice,
+            timestamp=self._captured._current_timestamp(),
             provider="openai",
             identity_context=self._captured._identity_context,
+            decision_context=self._captured._get_decision_context(),
             psych_context=self._captured._get_psych_context(),
             source=self._captured._source,
         )
@@ -206,7 +236,9 @@ class _CompletionsNamespace:
             request_hash=request_envelope.hash,
             provider_request_id=response.id,
             latency_ms=latency_ms,
+            timestamp=self._captured._current_timestamp(),
             identity_context=self._captured._identity_context,
+            decision_context=self._captured._get_decision_context(),
             psych_context=self._captured._get_psych_context(),
             source=self._captured._source,
         )
@@ -230,7 +262,9 @@ class ToolRouter:
         vault: VaultWriter,
         identity_context: IdentityContext | None = None,
         source: EventSource = EventSource.CAPTURED,
+        decision_context_provider: DecisionContextProvider | None = None,
         psych_context_provider: PsychContextProvider | None = None,
+        timestamp_provider: Callable[[], datetime] | None = None,
     ) -> None:
         """
         Initialize tool router.
@@ -239,12 +273,16 @@ class ToolRouter:
             vault: Vault writer for recording.
             identity_context: Identity context for events.
             source: Event source (captured or synthetic).
+            decision_context_provider: Optional provider for decision context snapshots.
             psych_context_provider: Optional provider for psych context snapshots.
+            timestamp_provider: Optional event timestamp provider.
         """
         self._vault = vault
         self._identity_context = identity_context
         self._source = source
+        self._decision_context_provider = decision_context_provider
         self._psych_context_provider = psych_context_provider
+        self._timestamp_provider = timestamp_provider
         self._tools: dict[str, Callable[..., Any]] = {}
         self._last_response_seq: int | None = None
 
@@ -258,6 +296,23 @@ class ToolRouter:
         if isinstance(context, PsychContext):
             return context
         return PsychContext.model_validate(context)
+
+    def _get_decision_context(self) -> DecisionContextSnapshot | None:
+        provider = self._decision_context_provider
+        if provider is None:
+            return None
+        context = provider.get_current_context()
+        if context is None:
+            return None
+        if isinstance(context, DecisionContextSnapshot):
+            return context
+        return DecisionContextSnapshot.model_validate(context)
+
+    def _current_timestamp(self) -> datetime:
+        provider = self._timestamp_provider
+        if provider is None:
+            return datetime.now(timezone.utc)
+        return provider()
 
     def register(self, name: str, fn: Callable[..., Any]) -> None:
         """Register a tool function."""
@@ -297,7 +352,9 @@ class ToolRouter:
             tool_input=arguments,
             tool_input_hash=domain_hash("tool_call", arguments),
             triggered_by_seq=triggered_by_seq or self._last_response_seq,
+            timestamp=self._current_timestamp(),
             identity_context=self._identity_context,
+            decision_context=self._get_decision_context(),
             psych_context=self._get_psych_context(),
             source=self._source,
         )
@@ -325,7 +382,9 @@ class ToolRouter:
             success=success,
             error_message=error_message,
             call_seq=call_envelope.seq,
+            timestamp=self._current_timestamp(),
             identity_context=self._identity_context,
+            decision_context=self._get_decision_context(),
             psych_context=self._get_psych_context(),
             source=self._source,
         )
@@ -340,7 +399,10 @@ def intercept_openai(
     *,
     identity_context: IdentityContext | None = None,
     source: EventSource = EventSource.CAPTURED,
+    decision_context_provider: DecisionContextProvider | None = None,
     psych_context_provider: PsychContextProvider | None = None,
+    run_id: str | None = None,
+    timestamp_provider: Callable[[], datetime] | None = None,
 ) -> CapturedOpenAI:
     """
     Wrap an OpenAI client to capture all calls.
@@ -350,7 +412,10 @@ def intercept_openai(
         vault_path: Path to store captured events.
         identity_context: Identity context for captured events.
         source: Event source (captured or synthetic).
+        decision_context_provider: Optional provider for decision context snapshots.
         psych_context_provider: Optional provider for psych context snapshots.
+        run_id: Optional fixed capture session ID.
+        timestamp_provider: Optional event timestamp provider.
 
     Returns:
         Wrapped client that records to vault.
@@ -360,5 +425,8 @@ def intercept_openai(
         vault_path=vault_path,
         identity_context=identity_context,
         source=source,
+        decision_context_provider=decision_context_provider,
         psych_context_provider=psych_context_provider,
+        run_id=run_id,
+        timestamp_provider=timestamp_provider,
     )

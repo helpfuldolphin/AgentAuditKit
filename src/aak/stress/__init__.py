@@ -10,7 +10,7 @@ from typing import Any
 from aak.canon.hasher import domain_hash
 from aak.replay import ReplayError, replay_timeline
 
-STRESS_VERSION = "0.1.0"
+STRESS_VERSION = "0.3.0"
 STRESS_PROFILE_AUTHORITY = "authority"
 SUPPORTED_STRESS_PROFILES = (STRESS_PROFILE_AUTHORITY,)
 DIFF_DETERMINISM_MODE = "strict-identical"

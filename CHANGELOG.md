@@ -2,6 +2,43 @@
 
 All notable changes to Agent Audit Kit are documented here.
 
+## [0.3.0] - 2026-03-20
+
+### Added
+
+- First-class `DecisionContextSnapshot` model for exhibit-grade decision lineage.
+- Accountability metadata support in session metadata (`requested_by`, `approved_by`, `environment`, `policy_version`).
+- Built-in banking decision-exposure capture workflow behind `aak capture run --config ...`.
+- Canonical banking golden run artifact: `golden_runs/aak-v0.3.0-bank-decision-exposure/`.
+- Evidence-pack generation outputs:
+  - `audit_report.md`
+  - `temporal_narrative.md`
+  - `counterfactual_checklist.md`
+  - `decision_context_chain.json`
+  - `decision_timeline.mmd`
+  - `evidence_pack_manifest.json`
+  - copied technical `bundle/`
+- Optional verifier-evidence models and bundle support for `verifiers/` artifacts.
+- New contracts:
+  - `docs/contracts/DECISION_CONTEXT_CONTRACT_V0_3.md`
+  - `docs/contracts/EVIDENCE_PACK_CONTRACT_V0_3.md`
+  - `docs/contracts/VERIFIER_EVIDENCE_CONTRACT_V0_3.md`
+- New design guidance: `docs/DESIGN_PRINCIPLES.md`.
+- New acceptance/integration gates for exhibit-grade lineage and verifier evidence.
+
+### Changed
+
+- `aak report generate` now produces an exhibit-grade evidence pack instead of only a single markdown file.
+- Report output now renders recorded accountability fields instead of hardcoded `UNKNOWN` placeholders.
+- Replay verification and embedded `verify.py` now support optional verifier-artifact fail-closed checks.
+- Package/runtime/report/stress versions now align on `0.3.0`.
+
+### Non-Claims
+
+- Evidence tooling only.
+- No governance authority, compliance certification, or automatic legal conclusions.
+- Optional verifier evidence is supporting evidence, not an authority upgrade by itself.
+
 ## [0.2.0-psych-context] - 2026-02-21
 
 ### Added

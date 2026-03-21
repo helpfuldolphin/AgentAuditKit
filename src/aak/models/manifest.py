@@ -10,6 +10,18 @@ from pydantic import BaseModel, Field
 from aak.models.events import EventEnvelope
 from aak.models.psych import PsychCaptureMode, PsychContextSource
 from aak.models.threats import ThreatFlag
+from aak.models.verifier import VerifierEvidence
+
+
+class AccountabilityMetadata(BaseModel):
+    """Accountability metadata for the captured workflow."""
+
+    requested_by: str | None = None
+    approved_by: str | None = None
+    environment: str | None = None
+    policy_version: str | None = None
+
+    model_config = {"extra": "forbid"}
 
 
 class SessionMetadata(BaseModel):
@@ -17,14 +29,18 @@ class SessionMetadata(BaseModel):
 
     model_id: str | None = None
     provider: str | None = None
+    workflow_id: str | None = None
+    workflow_name: str | None = None
     sampling_params: dict[str, float | int | None] = Field(default_factory=dict)
     sdk_version: str
     interceptor_config: dict[str, Any] = Field(default_factory=dict)
+    accountability: AccountabilityMetadata | None = None
     psych_context_enabled: bool = False
     psych_contract_version: str | None = None
     psych_provider: str | None = None
     psych_capture_mode: PsychCaptureMode | None = None
     psych_source: PsychContextSource | None = None
+    verifier_contract_version: str | None = None
 
     model_config = {"extra": "forbid"}
 
@@ -36,7 +52,7 @@ class ReplayManifest(BaseModel):
     Contains hash chain metadata and threat flags.
     """
 
-    version: str = "0.1.0"
+    version: str = "0.3.0"
     bundle_id: str = Field(..., pattern=r"^run_[a-z0-9]{6,32}$")
     created_at: datetime
 
@@ -53,6 +69,7 @@ class ReplayManifest(BaseModel):
 
     # Threat detection results
     threat_flags: list[ThreatFlag] = Field(default_factory=list)
+    verifier_evidence: list[VerifierEvidence] = Field(default_factory=list)
 
     # Disclaimer (always present)
     disclaimer: str = Field(

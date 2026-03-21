@@ -1,6 +1,6 @@
 [project]
 name = "agent-audit-kit"
-version = "0.1.0"
+version = "0.3.0"
 description = "Forensic evidence capture and replay for AI agents"
 readme = "README.md"
 license = "Apache-2.0"

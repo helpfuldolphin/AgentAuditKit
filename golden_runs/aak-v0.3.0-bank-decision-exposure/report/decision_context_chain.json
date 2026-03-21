@@ -1,0 +1,551 @@
+{
+  "bundle_id": "run_36739dd5b370869b",
+  "contexts": [
+    {
+      "action_summary": "Review high-value vendor wire release request",
+      "approved_by": "dual_control_officer",
+      "confidence_signals": [
+        {
+          "label": "vendor_match_score",
+          "note": "Vendor bank account changed within 24 hours.",
+          "signal_id": "vendor_match_score",
+          "source_ref": "tool:lookup_vendor_profile",
+          "status": "present",
+          "value": 0.42
+        }
+      ],
+      "context_references": [
+        {
+          "label": "payment_review_id",
+          "note": null,
+          "ref": "PAY-2026-0319-771",
+          "ref_hash": null,
+          "ref_type": "workflow"
+        },
+        {
+          "label": "policy",
+          "note": null,
+          "ref": "wire_policy_v3",
+          "ref_hash": null,
+          "ref_type": "policy"
+        }
+      ],
+      "counterfactual_checks": [
+        "Confirm whether an independent vendor callback occurred before release.",
+        "Confirm whether a second approver should have been present at intake."
+      ],
+      "environment": "banking-prod-sim",
+      "event_hash": "4bb897f5bdfa188b95a70fc2b62c24af482af3a686eb70062ab37f46d831f27f",
+      "event_type": "llm_request",
+      "missing_confidence_signals": [
+        "out_of_band_vendor_confirmation"
+      ],
+      "payload_file": "events/001_llm_request.json",
+      "perceived_world_state": [
+        "Payment amount exceeds standard auto-release threshold.",
+        "Vendor beneficiary account changed within the last 24 hours."
+      ],
+      "policy_version": "wire_policy_v3",
+      "requested_by": "treasury_ops_queue",
+      "reversible": true,
+      "seq": 1,
+      "snapshot_id": "wire_review_intake",
+      "timestamp": "2026-03-20T14:00:02Z",
+      "upstream_inputs": [
+        "payment_queue: PAY-2026-0319-771",
+        "request channel: treasury operations queue"
+      ]
+    },
+    {
+      "action_summary": "Review high-value vendor wire release request",
+      "approved_by": "dual_control_officer",
+      "confidence_signals": [
+        {
+          "label": "vendor_match_score",
+          "note": "Vendor bank account changed within 24 hours.",
+          "signal_id": "vendor_match_score",
+          "source_ref": "tool:lookup_vendor_profile",
+          "status": "present",
+          "value": 0.42
+        }
+      ],
+      "context_references": [
+        {
+          "label": "payment_review_id",
+          "note": null,
+          "ref": "PAY-2026-0319-771",
+          "ref_hash": null,
+          "ref_type": "workflow"
+        },
+        {
+          "label": "policy",
+          "note": null,
+          "ref": "wire_policy_v3",
+          "ref_hash": null,
+          "ref_type": "policy"
+        }
+      ],
+      "counterfactual_checks": [
+        "Confirm whether an independent vendor callback occurred before release.",
+        "Confirm whether a second approver should have been present at intake."
+      ],
+      "environment": "banking-prod-sim",
+      "event_hash": "81cdd5262b725a0bcc2a51191afabaa97b7dbccac2e129144103617fcf92611e",
+      "event_type": "llm_response",
+      "missing_confidence_signals": [
+        "out_of_band_vendor_confirmation"
+      ],
+      "payload_file": "events/002_llm_response.json",
+      "perceived_world_state": [
+        "Payment amount exceeds standard auto-release threshold.",
+        "Vendor beneficiary account changed within the last 24 hours."
+      ],
+      "policy_version": "wire_policy_v3",
+      "requested_by": "treasury_ops_queue",
+      "reversible": true,
+      "seq": 2,
+      "snapshot_id": "wire_review_intake",
+      "timestamp": "2026-03-20T14:00:03Z",
+      "upstream_inputs": [
+        "payment_queue: PAY-2026-0319-771",
+        "request channel: treasury operations queue"
+      ]
+    },
+    {
+      "action_summary": "Inspect vendor profile and beneficiary change details",
+      "approved_by": "dual_control_officer",
+      "confidence_signals": [
+        {
+          "label": "vendor_match_score",
+          "note": "Vendor bank account changed within 24 hours.",
+          "signal_id": "vendor_match_score",
+          "source_ref": "tool:lookup_vendor_profile",
+          "status": "present",
+          "value": 0.42
+        }
+      ],
+      "context_references": [
+        {
+          "label": "payment_review_id",
+          "note": null,
+          "ref": "PAY-2026-0319-771",
+          "ref_hash": null,
+          "ref_type": "workflow"
+        },
+        {
+          "label": "policy",
+          "note": null,
+          "ref": "wire_policy_v3",
+          "ref_hash": null,
+          "ref_type": "policy"
+        }
+      ],
+      "counterfactual_checks": [
+        "Check whether the beneficiary change ticket was independently validated."
+      ],
+      "environment": "banking-prod-sim",
+      "event_hash": "2826d12778304b57b5891695d4d4b152e0ac7c6888c781df8ff20d4196b3dfd0",
+      "event_type": "tool_call",
+      "missing_confidence_signals": [
+        "secondary_approval_record"
+      ],
+      "payload_file": "events/003_tool_call.json",
+      "perceived_world_state": [
+        "Vendor profile lookup is pending.",
+        "No secondary approval has been recorded yet."
+      ],
+      "policy_version": "wire_policy_v3",
+      "requested_by": "treasury_ops_queue",
+      "reversible": true,
+      "seq": 3,
+      "snapshot_id": "wire_review_vendor_lookup",
+      "timestamp": "2026-03-20T14:00:05Z",
+      "upstream_inputs": [
+        "tool request: lookup_vendor_profile"
+      ]
+    },
+    {
+      "action_summary": "Inspect vendor profile and beneficiary change details",
+      "approved_by": "dual_control_officer",
+      "confidence_signals": [
+        {
+          "label": "vendor_match_score",
+          "note": "Vendor bank account changed within 24 hours.",
+          "signal_id": "vendor_match_score",
+          "source_ref": "tool:lookup_vendor_profile",
+          "status": "present",
+          "value": 0.42
+        }
+      ],
+      "context_references": [
+        {
+          "label": "payment_review_id",
+          "note": null,
+          "ref": "PAY-2026-0319-771",
+          "ref_hash": null,
+          "ref_type": "workflow"
+        },
+        {
+          "label": "policy",
+          "note": null,
+          "ref": "wire_policy_v3",
+          "ref_hash": null,
+          "ref_type": "policy"
+        }
+      ],
+      "counterfactual_checks": [
+        "Check whether the beneficiary change ticket was independently validated."
+      ],
+      "environment": "banking-prod-sim",
+      "event_hash": "ec3646e250999bd02dc35713a41d141e74184b358edfc8a3b1f133e860b0729d",
+      "event_type": "tool_result",
+      "missing_confidence_signals": [
+        "secondary_approval_record"
+      ],
+      "payload_file": "events/004_tool_result.json",
+      "perceived_world_state": [
+        "Vendor profile lookup is pending.",
+        "No secondary approval has been recorded yet."
+      ],
+      "policy_version": "wire_policy_v3",
+      "requested_by": "treasury_ops_queue",
+      "reversible": true,
+      "seq": 4,
+      "snapshot_id": "wire_review_vendor_lookup",
+      "timestamp": "2026-03-20T14:00:06Z",
+      "upstream_inputs": [
+        "tool request: lookup_vendor_profile"
+      ]
+    },
+    {
+      "action_summary": "Evaluate release controls against recorded risk factors",
+      "approved_by": "dual_control_officer",
+      "confidence_signals": [
+        {
+          "label": "vendor_match_score",
+          "note": "Vendor bank account changed within 24 hours.",
+          "signal_id": "vendor_match_score",
+          "source_ref": "tool:lookup_vendor_profile",
+          "status": "present",
+          "value": 0.42
+        }
+      ],
+      "context_references": [
+        {
+          "label": "payment_review_id",
+          "note": null,
+          "ref": "PAY-2026-0319-771",
+          "ref_hash": null,
+          "ref_type": "workflow"
+        },
+        {
+          "label": "policy",
+          "note": null,
+          "ref": "wire_policy_v3",
+          "ref_hash": null,
+          "ref_type": "policy"
+        }
+      ],
+      "counterfactual_checks": [
+        "Check whether policy required an automatic hold on recent beneficiary changes."
+      ],
+      "environment": "banking-prod-sim",
+      "event_hash": "169a3b287cca56af57af4e0c526db397455b56f520f9f74abef1af2127c25dd8",
+      "event_type": "llm_request",
+      "missing_confidence_signals": [
+        "dual_approval_record",
+        "out_of_band_vendor_confirmation"
+      ],
+      "payload_file": "events/005_llm_request.json",
+      "perceived_world_state": [
+        "Vendor profile shows a recent beneficiary-account change.",
+        "No dual approval is present for the release request."
+      ],
+      "policy_version": "wire_policy_v3",
+      "requested_by": "treasury_ops_queue",
+      "reversible": true,
+      "seq": 5,
+      "snapshot_id": "wire_review_policy_check",
+      "timestamp": "2026-03-20T14:00:08Z",
+      "upstream_inputs": [
+        "tool result: lookup_vendor_profile",
+        "policy baseline: wire controls"
+      ]
+    },
+    {
+      "action_summary": "Evaluate release controls against recorded risk factors",
+      "approved_by": "dual_control_officer",
+      "confidence_signals": [
+        {
+          "label": "vendor_match_score",
+          "note": "Vendor bank account changed within 24 hours.",
+          "signal_id": "vendor_match_score",
+          "source_ref": "tool:lookup_vendor_profile",
+          "status": "present",
+          "value": 0.42
+        }
+      ],
+      "context_references": [
+        {
+          "label": "payment_review_id",
+          "note": null,
+          "ref": "PAY-2026-0319-771",
+          "ref_hash": null,
+          "ref_type": "workflow"
+        },
+        {
+          "label": "policy",
+          "note": null,
+          "ref": "wire_policy_v3",
+          "ref_hash": null,
+          "ref_type": "policy"
+        }
+      ],
+      "counterfactual_checks": [
+        "Check whether policy required an automatic hold on recent beneficiary changes."
+      ],
+      "environment": "banking-prod-sim",
+      "event_hash": "5cc8049796f52b49774a5870b6980dca4bf733efe70d576e3373d5a1d37433ae",
+      "event_type": "llm_response",
+      "missing_confidence_signals": [
+        "dual_approval_record",
+        "out_of_band_vendor_confirmation"
+      ],
+      "payload_file": "events/006_llm_response.json",
+      "perceived_world_state": [
+        "Vendor profile shows a recent beneficiary-account change.",
+        "No dual approval is present for the release request."
+      ],
+      "policy_version": "wire_policy_v3",
+      "requested_by": "treasury_ops_queue",
+      "reversible": true,
+      "seq": 6,
+      "snapshot_id": "wire_review_policy_check",
+      "timestamp": "2026-03-20T14:00:09Z",
+      "upstream_inputs": [
+        "tool result: lookup_vendor_profile",
+        "policy baseline: wire controls"
+      ]
+    },
+    {
+      "action_summary": "Evaluate release controls against recorded risk factors",
+      "approved_by": "dual_control_officer",
+      "confidence_signals": [
+        {
+          "label": "vendor_match_score",
+          "note": "Vendor bank account changed within 24 hours.",
+          "signal_id": "vendor_match_score",
+          "source_ref": "tool:lookup_vendor_profile",
+          "status": "present",
+          "value": 0.42
+        }
+      ],
+      "context_references": [
+        {
+          "label": "payment_review_id",
+          "note": null,
+          "ref": "PAY-2026-0319-771",
+          "ref_hash": null,
+          "ref_type": "workflow"
+        },
+        {
+          "label": "policy",
+          "note": null,
+          "ref": "wire_policy_v3",
+          "ref_hash": null,
+          "ref_type": "policy"
+        }
+      ],
+      "counterfactual_checks": [
+        "Check whether policy required an automatic hold on recent beneficiary changes."
+      ],
+      "environment": "banking-prod-sim",
+      "event_hash": "59ec357e1dc6f1350a2a527096bfece4f2e2ab11e2e0cae02868fe5a2fffedb8",
+      "event_type": "tool_call",
+      "missing_confidence_signals": [
+        "dual_approval_record",
+        "out_of_band_vendor_confirmation"
+      ],
+      "payload_file": "events/007_tool_call.json",
+      "perceived_world_state": [
+        "Vendor profile shows a recent beneficiary-account change.",
+        "No dual approval is present for the release request."
+      ],
+      "policy_version": "wire_policy_v3",
+      "requested_by": "treasury_ops_queue",
+      "reversible": true,
+      "seq": 7,
+      "snapshot_id": "wire_review_policy_check",
+      "timestamp": "2026-03-20T14:00:10Z",
+      "upstream_inputs": [
+        "tool result: lookup_vendor_profile",
+        "policy baseline: wire controls"
+      ]
+    },
+    {
+      "action_summary": "Evaluate release controls against recorded risk factors",
+      "approved_by": "dual_control_officer",
+      "confidence_signals": [
+        {
+          "label": "vendor_match_score",
+          "note": "Vendor bank account changed within 24 hours.",
+          "signal_id": "vendor_match_score",
+          "source_ref": "tool:lookup_vendor_profile",
+          "status": "present",
+          "value": 0.42
+        }
+      ],
+      "context_references": [
+        {
+          "label": "payment_review_id",
+          "note": null,
+          "ref": "PAY-2026-0319-771",
+          "ref_hash": null,
+          "ref_type": "workflow"
+        },
+        {
+          "label": "policy",
+          "note": null,
+          "ref": "wire_policy_v3",
+          "ref_hash": null,
+          "ref_type": "policy"
+        }
+      ],
+      "counterfactual_checks": [
+        "Check whether policy required an automatic hold on recent beneficiary changes."
+      ],
+      "environment": "banking-prod-sim",
+      "event_hash": "fcc6a2b9e80dfbbe12708c6a452244df6c1f23ffea95e70c16f78aae1f6089d0",
+      "event_type": "tool_result",
+      "missing_confidence_signals": [
+        "dual_approval_record",
+        "out_of_band_vendor_confirmation"
+      ],
+      "payload_file": "events/008_tool_result.json",
+      "perceived_world_state": [
+        "Vendor profile shows a recent beneficiary-account change.",
+        "No dual approval is present for the release request."
+      ],
+      "policy_version": "wire_policy_v3",
+      "requested_by": "treasury_ops_queue",
+      "reversible": true,
+      "seq": 8,
+      "snapshot_id": "wire_review_policy_check",
+      "timestamp": "2026-03-20T14:00:11Z",
+      "upstream_inputs": [
+        "tool result: lookup_vendor_profile",
+        "policy baseline: wire controls"
+      ]
+    },
+    {
+      "action_summary": "Issue hold/review recommendation before funds movement",
+      "approved_by": "dual_control_officer",
+      "confidence_signals": [
+        {
+          "label": "vendor_match_score",
+          "note": "Vendor bank account changed within 24 hours.",
+          "signal_id": "vendor_match_score",
+          "source_ref": "tool:lookup_vendor_profile",
+          "status": "present",
+          "value": 0.42
+        }
+      ],
+      "context_references": [
+        {
+          "label": "payment_review_id",
+          "note": null,
+          "ref": "PAY-2026-0319-771",
+          "ref_hash": null,
+          "ref_type": "workflow"
+        },
+        {
+          "label": "policy",
+          "note": null,
+          "ref": "wire_policy_v3",
+          "ref_hash": null,
+          "ref_type": "policy"
+        }
+      ],
+      "counterfactual_checks": [
+        "Check whether the release would remain paused until confirmation and approval are present."
+      ],
+      "environment": "banking-prod-sim",
+      "event_hash": "1cde8805fcb7548619b1e5a111a037ea1d98b785c73bdab87f46c7e67cc4175f",
+      "event_type": "llm_request",
+      "missing_confidence_signals": [
+        "out_of_band_vendor_confirmation"
+      ],
+      "payload_file": "events/009_llm_request.json",
+      "perceived_world_state": [
+        "Policy controls recommend hold_for_review.",
+        "Release can still be paused before any funds movement."
+      ],
+      "policy_version": "wire_policy_v3",
+      "requested_by": "treasury_ops_queue",
+      "reversible": true,
+      "seq": 9,
+      "snapshot_id": "wire_review_outcome",
+      "timestamp": "2026-03-20T14:00:13Z",
+      "upstream_inputs": [
+        "tool result: check_policy_controls",
+        "decision path: release recommendation"
+      ]
+    },
+    {
+      "action_summary": "Issue hold/review recommendation before funds movement",
+      "approved_by": "dual_control_officer",
+      "confidence_signals": [
+        {
+          "label": "vendor_match_score",
+          "note": "Vendor bank account changed within 24 hours.",
+          "signal_id": "vendor_match_score",
+          "source_ref": "tool:lookup_vendor_profile",
+          "status": "present",
+          "value": 0.42
+        }
+      ],
+      "context_references": [
+        {
+          "label": "payment_review_id",
+          "note": null,
+          "ref": "PAY-2026-0319-771",
+          "ref_hash": null,
+          "ref_type": "workflow"
+        },
+        {
+          "label": "policy",
+          "note": null,
+          "ref": "wire_policy_v3",
+          "ref_hash": null,
+          "ref_type": "policy"
+        }
+      ],
+      "counterfactual_checks": [
+        "Check whether the release would remain paused until confirmation and approval are present."
+      ],
+      "environment": "banking-prod-sim",
+      "event_hash": "b0b5f615a651ae76e78a0be0ddb5f815b5634a14a3401733897c7f3a7e182e1e",
+      "event_type": "llm_response",
+      "missing_confidence_signals": [
+        "out_of_band_vendor_confirmation"
+      ],
+      "payload_file": "events/010_llm_response.json",
+      "perceived_world_state": [
+        "Policy controls recommend hold_for_review.",
+        "Release can still be paused before any funds movement."
+      ],
+      "policy_version": "wire_policy_v3",
+      "requested_by": "treasury_ops_queue",
+      "reversible": true,
+      "seq": 10,
+      "snapshot_id": "wire_review_outcome",
+      "timestamp": "2026-03-20T14:00:14Z",
+      "upstream_inputs": [
+        "tool result: check_policy_controls",
+        "decision path: release recommendation"
+      ]
+    }
+  ],
+  "decision_context_count": 10,
+  "timeline_hash": "8a46fa44fb8b6516b7f287cb72b2c29ae10c1a6525cfb7bbe9a501934420bd95"
+}

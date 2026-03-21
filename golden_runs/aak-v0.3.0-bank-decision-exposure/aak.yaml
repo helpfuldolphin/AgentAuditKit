@@ -1,0 +1,11 @@
+scenario: banking_decision_exposure
+workflow_id: wire_review_demo
+workflow_name: Banking Decision Exposure Review
+requested_by: treasury_ops_queue
+approved_by: dual_control_officer
+environment: banking-prod-sim
+policy_version: wire_policy_v3
+run_id: run_36739dd5b370869b
+clock_start: 2026-03-20T14:00:00Z
+clock_step_seconds: 1
+seed: 11

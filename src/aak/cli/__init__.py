@@ -7,12 +7,10 @@ from pathlib import Path
 from typing import Sequence
 
 from aak import __version__
-from aak.models.events import EventSource, LLMRequestEvent, LLMResponseEvent, SessionStartEvent
+from aak.capture import run_capture_from_config
 from aak.replay import verify_bundle
 from aak.report import ReportError, generate_audit_report
 from aak.stress import SUPPORTED_STRESS_PROFILES, StressError, run_stress
-from aak.vault.export import export_bundle
-from aak.vault.store import VaultWriter
 
 EXIT_OK = 0
 EXIT_VERIFY_FAIL = 1
@@ -100,45 +98,10 @@ def _handle_capture_run(args: argparse.Namespace) -> int:
         return EXIT_USAGE_OR_RUNTIME
 
     output_path = Path(args.out)
-    vault_path = output_path / "vault"
-    bundle_path = output_path / "bundle"
-    output_path.mkdir(parents=True, exist_ok=True)
-
-    writer = VaultWriter(vault_path)
-    writer.append_event(
-        SessionStartEvent(
-            run_id=writer.run_id,
-            sdk_version=__version__,
-            vault_path=str(vault_path),
-            source=EventSource.CAPTURED,
-        )
-    )
-    request_event = LLMRequestEvent(
-        model_id="declared-runtime",
-        messages=[
-            {"role": "system", "content": "Capture scaffold event"},
-            {"role": "user", "content": f"Config declared at {config_path.name}"},
-        ],
-        temperature=0.0,
-        provider="aak",
-        source=EventSource.CAPTURED,
-    )
-    req_envelope = writer.append_event(request_event)
-    writer.append_event(
-        LLMResponseEvent(
-            model_id="declared-runtime",
-            content="Capture scaffold response",
-            finish_reason="stop",
-            request_hash=req_envelope.hash,
-            provider_request_id=f"capture-{writer.run_id}",
-            source=EventSource.CAPTURED,
-        )
-    )
-    writer.finalize()
-
-    result = export_bundle(vault_path, bundle_path, include_verify_script=True)
+    result = run_capture_from_config(config_path, output_path)
     print(f"[OK] Capture complete. Bundle: {result.bundle_path}")
     print(f"[OK] Events: {result.event_count}")
+    print(f"[OK] Workflow: {result.workflow_id}")
     return EXIT_OK
 
 
@@ -183,8 +146,11 @@ def _handle_report_generate(args: argparse.Namespace) -> int:
     print(f"[OK] Bundle ID: {result.bundle_id}")
     print(f"[OK] Events summarized: {result.event_count}")
     print(f"[OK] Decision points: {result.decision_point_count}")
+    print(f"[OK] Decision contexts: {result.decision_context_count}")
     print(f"[OK] Psych contexts: {result.psych_context_count}")
+    print(f"[OK] Verifier evidence entries: {result.verifier_evidence_count}")
     print(f"[OK] Report path: {result.report_path}")
+    print(f"[OK] Evidence pack manifest: {result.evidence_pack_manifest_path}")
     print(f"[OK] report_hash: {result.report_hash}")
     return EXIT_OK
 

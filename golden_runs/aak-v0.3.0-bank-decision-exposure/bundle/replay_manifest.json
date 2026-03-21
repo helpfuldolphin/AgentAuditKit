@@ -1,0 +1,126 @@
+{
+  "version": "0.3.0",
+  "bundle_id": "run_36739dd5b370869b",
+  "created_at": "2026-03-20T14:00:00Z",
+  "chain_root": "319f9cad86ac07861824bf997b0020349ec86a8e9fc6cfe64c89c91e516d4a70",
+  "chain_head": "8c0bf126b4a413abe650713b0aa168021ff054bd9ab3a5244f3a86a7891cdc4b",
+  "events": [
+    {
+      "seq": 0,
+      "event_type": "session_start",
+      "hash": "319f9cad86ac07861824bf997b0020349ec86a8e9fc6cfe64c89c91e516d4a70",
+      "prev_hash": "b2579e3d199750f127bce99b124b38eb4f17da770294c8ff40bf8e83b3c4e131",
+      "timestamp": "2026-03-20T14:00:00Z",
+      "payload_file": "events/000_session_start.json"
+    },
+    {
+      "seq": 1,
+      "event_type": "llm_request",
+      "hash": "4bb897f5bdfa188b95a70fc2b62c24af482af3a686eb70062ab37f46d831f27f",
+      "prev_hash": "9cd7ee6b40ea57df85f39f96f089fffe7e9eced5d2a26cfffb46af9a2a584f74",
+      "timestamp": "2026-03-20T14:00:02Z",
+      "payload_file": "events/001_llm_request.json"
+    },
+    {
+      "seq": 2,
+      "event_type": "llm_response",
+      "hash": "81cdd5262b725a0bcc2a51191afabaa97b7dbccac2e129144103617fcf92611e",
+      "prev_hash": "51f7b37fc6479d8802bd4515476bdaeb9d025aca2da4fd2b74cfccfd87420c6a",
+      "timestamp": "2026-03-20T14:00:03Z",
+      "payload_file": "events/002_llm_response.json"
+    },
+    {
+      "seq": 3,
+      "event_type": "tool_call",
+      "hash": "2826d12778304b57b5891695d4d4b152e0ac7c6888c781df8ff20d4196b3dfd0",
+      "prev_hash": "bd77917ac16494c39c9ac24922911ec33f61176458850ca0fec5e3112f4eb629",
+      "timestamp": "2026-03-20T14:00:05Z",
+      "payload_file": "events/003_tool_call.json"
+    },
+    {
+      "seq": 4,
+      "event_type": "tool_result",
+      "hash": "ec3646e250999bd02dc35713a41d141e74184b358edfc8a3b1f133e860b0729d",
+      "prev_hash": "523d5fb4583abaee9c307a1b7a01036c3d8c4098ffb1db29648b54239eff6523",
+      "timestamp": "2026-03-20T14:00:06Z",
+      "payload_file": "events/004_tool_result.json"
+    },
+    {
+      "seq": 5,
+      "event_type": "llm_request",
+      "hash": "169a3b287cca56af57af4e0c526db397455b56f520f9f74abef1af2127c25dd8",
+      "prev_hash": "632a7eb41b357d4456452cdad029ae9b58d7b5dcc9c89aa2d327e82ccf9fd33c",
+      "timestamp": "2026-03-20T14:00:08Z",
+      "payload_file": "events/005_llm_request.json"
+    },
+    {
+      "seq": 6,
+      "event_type": "llm_response",
+      "hash": "5cc8049796f52b49774a5870b6980dca4bf733efe70d576e3373d5a1d37433ae",
+      "prev_hash": "92cc87c104e11b98e38d30715641f74f14e976ad67ed89a5566ebc9507cd89fb",
+      "timestamp": "2026-03-20T14:00:09Z",
+      "payload_file": "events/006_llm_response.json"
+    },
+    {
+      "seq": 7,
+      "event_type": "tool_call",
+      "hash": "59ec357e1dc6f1350a2a527096bfece4f2e2ab11e2e0cae02868fe5a2fffedb8",
+      "prev_hash": "630129d1d945c7432ffbf6460553e68a86ed357c4b10f38de989045ee42089e2",
+      "timestamp": "2026-03-20T14:00:10Z",
+      "payload_file": "events/007_tool_call.json"
+    },
+    {
+      "seq": 8,
+      "event_type": "tool_result",
+      "hash": "fcc6a2b9e80dfbbe12708c6a452244df6c1f23ffea95e70c16f78aae1f6089d0",
+      "prev_hash": "09e4c93e8b30836b5316e92f3afb04263e3af2d7a3e405a888132900d0857614",
+      "timestamp": "2026-03-20T14:00:11Z",
+      "payload_file": "events/008_tool_result.json"
+    },
+    {
+      "seq": 9,
+      "event_type": "llm_request",
+      "hash": "1cde8805fcb7548619b1e5a111a037ea1d98b785c73bdab87f46c7e67cc4175f",
+      "prev_hash": "ed2e225348236a145942e77fae5eaac558465d77c88d579c871ae12619cbfbeb",
+      "timestamp": "2026-03-20T14:00:13Z",
+      "payload_file": "events/009_llm_request.json"
+    },
+    {
+      "seq": 10,
+      "event_type": "llm_response",
+      "hash": "b0b5f615a651ae76e78a0be0ddb5f815b5634a14a3401733897c7f3a7e182e1e",
+      "prev_hash": "f73586add7f3b3e8763a956a70f7f83447ae1795e86d233d876940bb956ddb5f",
+      "timestamp": "2026-03-20T14:00:14Z",
+      "payload_file": "events/010_llm_response.json"
+    }
+  ],
+  "event_count": 11,
+  "metadata": {
+    "model_id": "gpt-4o-2026-03-01",
+    "provider": "openai",
+    "workflow_id": "wire_review_demo",
+    "workflow_name": "Banking Decision Exposure Review",
+    "sampling_params": {
+      "temperature": 0.0
+    },
+    "sdk_version": "0.3.0",
+    "interceptor_config": {
+      "scenario_seed": 11
+    },
+    "accountability": {
+      "requested_by": "treasury_ops_queue",
+      "approved_by": "dual_control_officer",
+      "environment": "banking-prod-sim",
+      "policy_version": "wire_policy_v3"
+    },
+    "psych_context_enabled": false,
+    "psych_contract_version": null,
+    "psych_provider": null,
+    "psych_capture_mode": null,
+    "psych_source": null,
+    "verifier_contract_version": null
+  },
+  "threat_flags": [],
+  "verifier_evidence": [],
+  "disclaimer": "EVIDENCE ARTIFACT: This bundle is a forensic evidence artifact, NOT a compliance certification. Findings are heuristic-based. Hosted LLMs are non-deterministic; replay may produce different outputs. For governance-grade verification, see Lane A (MathLedger)."
+}

@@ -8,6 +8,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
+from aak.models.decision import DecisionContextSnapshot
 from aak.models.identity import IdentityContext
 from aak.models.psych import PsychContext
 
@@ -43,6 +44,7 @@ class EventBase(BaseModel):
     event_type: EventType
     timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     identity_context: IdentityContext | None = None
+    decision_context: DecisionContextSnapshot | None = None
     psych_context: PsychContext | None = None
 
     # Provenance labeling (REQUIRED for non-claims discipline)

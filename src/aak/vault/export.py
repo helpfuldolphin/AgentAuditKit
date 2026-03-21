@@ -8,11 +8,13 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
+from aak import __version__
 from aak.canon.hasher import EMBEDDED_HASHER, domain_hash
 from aak.canon.rfc8785 import EMBEDDED_CANONICALIZE
 from aak.models.manifest import ReplayManifest, SessionMetadata
 from aak.models.psych import PsychCaptureMode, PsychContextSource
 from aak.models.threats import ThreatFlag
+from aak.models.verifier import VerifierEvidence
 from aak.vault.store import VaultReader
 
 
@@ -24,17 +26,18 @@ class ExportResult:
     manifest_hash: str
     event_count: int
     threat_flags_count: int
+    verifier_evidence_count: int
 
 
-def _copy_optional_psych_artifacts(vault_path: Path, output_path: Path) -> int:
-    psych_source = vault_path / "psych"
-    if not psych_source.exists():
+def _copy_optional_directory(vault_path: Path, output_path: Path, directory: str) -> int:
+    source_root = vault_path / directory
+    if not source_root.exists():
         return 0
-    if not psych_source.is_dir():
-        raise ValueError(f"Psych artifact path is not a directory: {psych_source}")
+    if not source_root.is_dir():
+        raise ValueError(f"{directory} artifact path is not a directory: {source_root}")
 
     copied_count = 0
-    for source_path in psych_source.rglob("*"):
+    for source_path in source_root.rglob("*"):
         if not source_path.is_file():
             continue
         relative_path = source_path.relative_to(vault_path)
@@ -163,6 +166,28 @@ def verify_bundle(bundle_path: Path) -> tuple[bool, str, dict]:
 
     declared_event_files = set()
     declared_psych_artifacts = {{}}
+    declared_verifier_artifacts = {{}}
+
+    verifier_evidence_entries = manifest.get("verifier_evidence", [])
+    if verifier_evidence_entries is None:
+        verifier_evidence_entries = []
+    if not isinstance(verifier_evidence_entries, list):
+        return False, "Manifest field verifier_evidence must be an array", {{}}
+    for entry in verifier_evidence_entries:
+        if not isinstance(entry, dict):
+            return False, "Verifier evidence entry must be an object", {{}}
+        artifact_path = entry.get("artifact_path")
+        artifact_hash = entry.get("artifact_hash")
+        if artifact_path is None and artifact_hash is None:
+            continue
+        if not isinstance(artifact_path, str) or not isinstance(artifact_hash, str):
+            return False, "Verifier evidence artifact fields must be strings", {{}}
+        if not _is_safe_rel_path(artifact_path, "verifiers"):
+            return False, f"Invalid verifier artifact path: {{artifact_path}}", {{}}
+        previous = declared_verifier_artifacts.get(artifact_path)
+        if previous is not None and previous != artifact_hash:
+            return False, f"Conflicting verifier artifact hash for {{artifact_path}}", {{}}
+        declared_verifier_artifacts[artifact_path] = artifact_hash
 
     # Verify hash chain
     prev_hash = GENESIS_HASH
@@ -267,13 +292,38 @@ def verify_bundle(bundle_path: Path) -> tuple[bool, str, dict]:
         if computed_hash != expected_hash:
             return False, f"Psych artifact {{artifact_path}}: hash mismatch", {{}}
 
+    declared_verifier_files = set(declared_verifier_artifacts.keys())
+    actual_verifier_files = _collect_inventory(bundle_path, "verifiers")
+    extra_verifier_files = sorted(actual_verifier_files - declared_verifier_files)
+    missing_verifier_files = sorted(declared_verifier_files - actual_verifier_files)
+    if extra_verifier_files or missing_verifier_files:
+        parts = []
+        if extra_verifier_files:
+            parts.append(f"extra verifier artifacts: {{', '.join(extra_verifier_files)}}")
+        if missing_verifier_files:
+            parts.append(f"missing verifier artifacts: {{', '.join(missing_verifier_files)}}")
+        return False, "; ".join(parts), {{}}
+
+    for artifact_path, expected_hash in sorted(declared_verifier_artifacts.items()):
+        artifact_full_path = bundle_path / artifact_path
+        try:
+            artifact_payload = json.loads(artifact_full_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            return False, f"Verifier artifact {{artifact_path}}: invalid JSON ({{exc}})", {{}}
+
+        computed_hash = domain_hash("manifest", artifact_payload)
+        if computed_hash != expected_hash:
+            return False, f"Verifier artifact {{artifact_path}}: hash mismatch", {{}}
+
     msg = (
         "Verification passed. "
-        f"{{len(events)}} events, {{len(declared_psych_artifacts)}} psych artifacts, chain intact."
+        f"{{len(events)}} events, {{len(declared_psych_artifacts)}} psych artifacts, "
+        f"{{len(declared_verifier_artifacts)}} verifier artifacts, chain intact."
     )
     return True, msg, {{
         "event_count": len(events),
         "psych_artifact_count": len(declared_psych_artifacts),
+        "verifier_artifact_count": len(declared_verifier_artifacts),
     }}
 
 
@@ -344,6 +394,7 @@ def export_bundle(
     include_verify_script: bool = True,
     threat_flags: list[ThreatFlag] | None = None,
     session_metadata: SessionMetadata | None = None,
+    verifier_evidence: list[VerifierEvidence] | None = None,
 ) -> ExportResult:
     """
     Export vault to portable, self-contained bundle.
@@ -382,11 +433,12 @@ def export_bundle(
         shutil.copy2(event_file, events_output / event_file.name)
 
     psych_enabled, detected_mode, detected_source = _summarize_psych_context(events_source)
-    copied_psych_artifacts = _copy_optional_psych_artifacts(vault_path, output_path)
+    copied_psych_artifacts = _copy_optional_directory(vault_path, output_path, "psych")
+    copied_verifier_artifacts = _copy_optional_directory(vault_path, output_path, "verifiers")
     if copied_psych_artifacts > 0:
         psych_enabled = True
 
-    metadata = session_metadata or SessionMetadata(sdk_version="0.1.0")
+    metadata = session_metadata or SessionMetadata(sdk_version=__version__)
     if psych_enabled:
         metadata = metadata.model_copy(
             update={
@@ -400,6 +452,13 @@ def export_bundle(
                 "psych_source": (
                     metadata.psych_source or detected_source or PsychContextSource.CAPTURED
                 ),
+            }
+        )
+    if verifier_evidence:
+        metadata = metadata.model_copy(
+            update={
+                "verifier_contract_version": metadata.verifier_contract_version
+                or "VERIFIER_EVIDENCE_CONTRACT_V0_3"
             }
         )
 
@@ -416,15 +475,18 @@ def export_bundle(
         except (json.JSONDecodeError, KeyError):
             pass
 
+    created_at = envelopes[0].timestamp if envelopes else datetime.now(timezone.utc)
+
     manifest = ReplayManifest(
         bundle_id=run_id,
-        created_at=datetime.now(timezone.utc),
+        created_at=created_at,
         chain_root=verification.chain_root,
         chain_head=verification.chain_head,
         events=[e.model_dump(mode="json") for e in envelopes],
         event_count=verification.event_count,
         metadata=metadata,
         threat_flags=threat_flags or [],
+        verifier_evidence=verifier_evidence or [],
     )
 
     # Write manifest (pretty-printed for readability)
@@ -451,6 +513,7 @@ Bundle ID: {run_id}
 Created:   {manifest.created_at.isoformat()}
 Events:    {verification.event_count}
 Psych:     {copied_psych_artifacts} artifact(s)
+Verifiers: {copied_verifier_artifacts} artifact(s)
 
 VERIFICATION
 ------------
@@ -459,6 +522,7 @@ Run: python verify.py
 This will verify:
 - hash chain integrity of all events
 - optional psych artifact references and hashes
+- optional verifier artifact references and hashes
 
 DISCLAIMER
 ----------
@@ -474,4 +538,5 @@ For more information, see: https://github.com/your-org/agent-audit-kit
         manifest_hash=manifest_hash,
         event_count=verification.event_count,
         threat_flags_count=len(threat_flags or []),
+        verifier_evidence_count=len(verifier_evidence or []),
     )

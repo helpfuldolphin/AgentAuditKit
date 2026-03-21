@@ -1,0 +1,5 @@
+python examples/generate_banking_golden_run.py --out golden_runs\aak-v0.3.0-bank-decision-exposure --force
+python -m aak.cli replay verify --bundle golden_runs\aak-v0.3.0-bank-decision-exposure\bundle
+python -m aak.cli stress run --bundle golden_runs\aak-v0.3.0-bank-decision-exposure\bundle --profile authority --seed 11
+python -m aak.cli report generate --bundle golden_runs\aak-v0.3.0-bank-decision-exposure\bundle --out golden_runs\aak-v0.3.0-bank-decision-exposure\report
+cd golden_runs\aak-v0.3.0-bank-decision-exposure\bundle && python verify.py

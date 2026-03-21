@@ -9,6 +9,7 @@ from typing import Any
 
 from aak.canon.hasher import GENESIS_HASH, chain_hash, domain_hash
 from aak.models.psych import psych_artifact_hash
+from aak.models.verifier import verifier_artifact_hash
 
 REPLAY_CLOCK_POLICY = "seq_asc_then_manifest_timestamp"
 
@@ -115,6 +116,15 @@ def _is_safe_psych_path(artifact_path: str) -> bool:
     if ".." in path.parts:
         return False
     return path.parts[:1] == ("psych",)
+
+
+def _is_safe_verifier_path(artifact_path: str) -> bool:
+    path = Path(artifact_path)
+    if path.is_absolute():
+        return False
+    if ".." in path.parts:
+        return False
+    return path.parts[:1] == ("verifiers",)
 
 
 def _load_manifest(bundle_path: Path) -> dict[str, Any]:
@@ -231,6 +241,27 @@ def _verify_and_collect(
 
         frames_payloads: list[dict[str, Any]] = []
         declared_psych_artifacts: dict[str, str] = {}
+        declared_verifier_artifacts: dict[str, str] = {}
+        verifier_evidence_entries = manifest.get("verifier_evidence", [])
+        if verifier_evidence_entries is None:
+            verifier_evidence_entries = []
+        if not isinstance(verifier_evidence_entries, list):
+            raise ReplayError("Manifest field 'verifier_evidence' must be an array")
+        for entry in verifier_evidence_entries:
+            if not isinstance(entry, dict):
+                raise ReplayError("Verifier evidence entry must be an object")
+            artifact_path = entry.get("artifact_path")
+            artifact_hash = entry.get("artifact_hash")
+            if artifact_path is None and artifact_hash is None:
+                continue
+            if not isinstance(artifact_path, str) or not isinstance(artifact_hash, str):
+                raise ReplayError("Verifier evidence artifact_path/artifact_hash must be strings")
+            if not _is_safe_verifier_path(artifact_path):
+                raise ReplayError(f"Invalid verifier artifact_path: {artifact_path}")
+            existing_hash = declared_verifier_artifacts.get(artifact_path)
+            if existing_hash is not None and existing_hash != artifact_hash:
+                raise ReplayError(f"Conflicting verifier artifact hash for {artifact_path}")
+            declared_verifier_artifacts[artifact_path] = artifact_hash
         prev_hash = GENESIS_HASH
         chain_root = GENESIS_HASH
 
@@ -314,6 +345,35 @@ def _verify_and_collect(
             computed_artifact_hash = psych_artifact_hash(artifact_payload)
             if computed_artifact_hash != expected_hash:
                 raise ReplayError(f"Psych artifact {artifact_path}: hash mismatch")
+
+        actual_verifier_files = _collect_optional_inventory(bundle_path, "verifiers")
+        declared_verifier_files = set(declared_verifier_artifacts.keys())
+        extra_verifier_files = sorted(actual_verifier_files - declared_verifier_files)
+        missing_verifier_files = sorted(declared_verifier_files - actual_verifier_files)
+        if extra_verifier_files or missing_verifier_files:
+            message_parts = []
+            if extra_verifier_files:
+                message_parts.append(
+                    f"extra verifier artifacts: {', '.join(extra_verifier_files)}"
+                )
+            if missing_verifier_files:
+                message_parts.append(
+                    f"missing verifier artifacts: {', '.join(missing_verifier_files)}"
+                )
+            raise ReplayError("; ".join(message_parts))
+
+        for artifact_path, expected_hash in sorted(declared_verifier_artifacts.items()):
+            artifact_full_path = bundle_path / artifact_path
+            try:
+                artifact_payload = json.loads(artifact_full_path.read_text(encoding="utf-8"))
+            except json.JSONDecodeError as exc:
+                raise ReplayError(
+                    f"Verifier artifact {artifact_path}: invalid JSON ({exc})"
+                ) from exc
+
+            computed_artifact_hash = verifier_artifact_hash(artifact_payload)
+            if computed_artifact_hash != expected_hash:
+                raise ReplayError(f"Verifier artifact {artifact_path}: hash mismatch")
 
         return (
             ReplayVerificationResult(

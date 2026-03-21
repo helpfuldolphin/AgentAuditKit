@@ -1,0 +1,11 @@
+{
+  "baseline_timeline_hash": "8a46fa44fb8b6516b7f287cb72b2c29ae10c1a6525cfb7bbe9a501934420bd95",
+  "bundle_id": "run_36739dd5b370869b",
+  "change_count": 0,
+  "changes": [],
+  "determinism_mode": "strict-identical",
+  "diff_hash": "65a96af5894416f00f530cc448277aba1d6a5ffcfe6cff4653a237f8eafb66a4",
+  "profile": "authority",
+  "stressed_timeline_hash": "8a46fa44fb8b6516b7f287cb72b2c29ae10c1a6525cfb7bbe9a501934420bd95",
+  "version": "0.3.0"
+}
